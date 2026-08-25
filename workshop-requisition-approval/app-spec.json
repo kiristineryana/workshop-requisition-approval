@@ -1,0 +1,737 @@
+{
+  "solution": {
+    "uniqueName": "WorkshopRequisitionApproval",
+    "displayName": "Workshop Requisition & Approval",
+    "publisherPrefix": "wksp"
+  },
+  "app": {
+    "name": "Workshop Purchase Requisition & Approval System",
+    "uniqueName": "wksp_workshopreqapproval",
+    "description": "Raise, route, and approve workshop purchase requisitions with a full audit trail."
+  },
+  "entities": [
+    {
+      "schemaName": "wksp_requisition",
+      "displayName": "Requisition",
+      "pluralName": "Requisitions",
+      "primaryAttribute": {
+        "schemaName": "wksp_requisitionnumber",
+        "displayName": "Requisition Number",
+        "autoNumberFormat": "REQ-{SEQNUM:6}"
+      },
+      "columns": [
+        {
+          "schemaName": "wksp_totalvalue",
+          "displayName": "Total Value",
+          "type": "Money"
+        },
+        {
+          "schemaName": "wksp_status",
+          "displayName": "Status",
+          "type": "Choice",
+          "required": true,
+          "options": [
+            "Draft",
+            "Submitted",
+            "In Approval",
+            "Approved",
+            "Rejected",
+            "Ordered",
+            "Received"
+          ]
+        },
+        {
+          "schemaName": "wksp_valuetier",
+          "displayName": "Value Tier",
+          "type": "Choice",
+          "options": [
+            "Under 1,000 AED",
+            "1,000-10,000 AED",
+            "Above 10,000 AED"
+          ]
+        },
+        {
+          "schemaName": "wksp_justification",
+          "displayName": "Justification",
+          "type": "Memo"
+        },
+        {
+          "schemaName": "wksp_datesubmitted",
+          "displayName": "Date Submitted",
+          "type": "DateTime",
+          "dateFormat": "DateAndTime"
+        }
+      ]
+    },
+    {
+      "schemaName": "wksp_requisitionlineitem",
+      "displayName": "Requisition Line Item",
+      "pluralName": "Requisition Line Items",
+      "primaryAttribute": {
+        "schemaName": "wksp_itemdescription",
+        "displayName": "Item Description"
+      },
+      "columns": [
+        {
+          "schemaName": "wksp_category",
+          "displayName": "Category",
+          "type": "Choice",
+          "options": [
+            "Part",
+            "Tool",
+            "Sublet",
+            "Consumable",
+            "Other"
+          ]
+        },
+        {
+          "schemaName": "wksp_quantity",
+          "displayName": "Quantity",
+          "type": "Integer",
+          "required": true,
+          "minValue": 1
+        },
+        {
+          "schemaName": "wksp_unitprice",
+          "displayName": "Unit Price",
+          "type": "Money",
+          "required": true,
+          "minValue": 0
+        },
+        {
+          "schemaName": "wksp_linetotal",
+          "displayName": "Line Total",
+          "type": "Money"
+        }
+      ]
+    },
+    {
+      "schemaName": "wksp_supplier",
+      "displayName": "Supplier",
+      "pluralName": "Suppliers",
+      "primaryAttribute": {
+        "schemaName": "wksp_suppliername",
+        "displayName": "Supplier Name"
+      },
+      "columns": [
+        {
+          "schemaName": "wksp_contactname",
+          "displayName": "Contact Name",
+          "type": "Text"
+        },
+        {
+          "schemaName": "wksp_email",
+          "displayName": "Email",
+          "type": "Text",
+          "format": "Email"
+        },
+        {
+          "schemaName": "wksp_phone",
+          "displayName": "Phone",
+          "type": "Text",
+          "format": "Phone"
+        }
+      ]
+    },
+    {
+      "schemaName": "wksp_approvalhistory",
+      "displayName": "Approval History",
+      "pluralName": "Approval Histories",
+      "primaryAttribute": {
+        "schemaName": "wksp_approvalnumber",
+        "displayName": "Approval Number",
+        "autoNumberFormat": "APR-{SEQNUM:6}"
+      },
+      "columns": [
+        {
+          "schemaName": "wksp_approvallevel",
+          "displayName": "Approval Level",
+          "type": "Choice",
+          "required": true,
+          "options": [
+            "Supervisor",
+            "Manager",
+            "Finance"
+          ]
+        },
+        {
+          "schemaName": "wksp_action",
+          "displayName": "Action",
+          "type": "Choice",
+          "required": true,
+          "options": [
+            "Approved",
+            "Rejected"
+          ]
+        },
+        {
+          "schemaName": "wksp_comment",
+          "displayName": "Comment",
+          "type": "Memo"
+        },
+        {
+          "schemaName": "wksp_decisiondate",
+          "displayName": "Decision Date",
+          "type": "DateTime",
+          "required": true,
+          "dateFormat": "DateAndTime"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "type": "OneToMany",
+      "referenced": "wksp_requisition",
+      "referencing": "wksp_requisitionlineitem",
+      "lookup": {
+        "schemaName": "wksp_ParentRequisitionId",
+        "displayName": "Parent Requisition"
+      }
+    },
+    {
+      "type": "OneToMany",
+      "referenced": "wksp_requisition",
+      "referencing": "wksp_approvalhistory",
+      "lookup": {
+        "schemaName": "wksp_RequisitionId",
+        "displayName": "Requisition"
+      }
+    },
+    {
+      "type": "OneToMany",
+      "referenced": "wksp_supplier",
+      "referencing": "wksp_requisition",
+      "lookup": {
+        "schemaName": "wksp_SupplierId",
+        "displayName": "Supplier"
+      }
+    },
+    {
+      "type": "OneToMany",
+      "referenced": "systemuser",
+      "referencing": "wksp_requisition",
+      "schemaName": "wksp_requester_requisition",
+      "lookup": {
+        "schemaName": "wksp_RequesterId",
+        "displayName": "Requester"
+      }
+    },
+    {
+      "type": "OneToMany",
+      "referenced": "systemuser",
+      "referencing": "wksp_requisition",
+      "schemaName": "wksp_currentapprover_requisition",
+      "lookup": {
+        "schemaName": "wksp_CurrentApproverId",
+        "displayName": "Current Approver"
+      }
+    },
+    {
+      "type": "OneToMany",
+      "referenced": "systemuser",
+      "referencing": "wksp_approvalhistory",
+      "schemaName": "wksp_approver_approvalhistory",
+      "lookup": {
+        "schemaName": "wksp_ApproverId",
+        "displayName": "Approver"
+      }
+    }
+  ],
+  "webResources": [
+    {
+      "name": "wksp_requisition.js",
+      "displayName": "Workshop Requisition Form Scripts",
+      "type": "js",
+      "content": "var Wksp = window.Wksp || {};\nWksp.Requisition = {\n  STATUS_DRAFT: 100000000,\n  onLoad: function (executionContext) {\n    var formContext = executionContext.getFormContext();\n    Wksp.Requisition.toggleApproverVisibility(formContext);\n    Wksp.Requisition.toggleJustificationRequired(formContext);\n  },\n  onStatusChange: function (executionContext) {\n    Wksp.Requisition.toggleApproverVisibility(executionContext.getFormContext());\n  },\n  onTotalValueChange: function (executionContext) {\n    Wksp.Requisition.toggleJustificationRequired(executionContext.getFormContext());\n  },\n  toggleApproverVisibility: function (formContext) {\n    var statusAttr = formContext.getAttribute('wksp_status');\n    var approverControl = formContext.getControl('wksp_currentapproverid');\n    if (!statusAttr || !approverControl) return;\n    approverControl.setVisible(statusAttr.getValue() !== Wksp.Requisition.STATUS_DRAFT);\n  },\n  toggleJustificationRequired: function (formContext) {\n    var totalAttr = formContext.getAttribute('wksp_totalvalue');\n    var justificationAttr = formContext.getAttribute('wksp_justification');\n    if (!totalAttr || !justificationAttr) return;\n    var total = totalAttr.getValue() || 0;\n    justificationAttr.setRequiredLevel(total >= 10000 ? 'required' : 'none');\n  }\n};\n\nWksp.LineItem = {\n  onLoad: function (executionContext) {\n    var formContext = executionContext.getFormContext();\n    Wksp.LineItem.recalculateLineTotal(formContext);\n    Wksp.LineItem.lockIfRequisitionNotEditable(formContext);\n  },\n  onQuantityOrPriceChange: function (executionContext) {\n    Wksp.LineItem.recalculateLineTotal(executionContext.getFormContext());\n  },\n  recalculateLineTotal: function (formContext) {\n    var qtyAttr = formContext.getAttribute('wksp_quantity');\n    var priceAttr = formContext.getAttribute('wksp_unitprice');\n    var totalAttr = formContext.getAttribute('wksp_linetotal');\n    if (!qtyAttr || !priceAttr || !totalAttr) return;\n    var qty = qtyAttr.getValue() || 0;\n    var price = priceAttr.getValue() || 0;\n    totalAttr.setValue(qty * price);\n  },\n  lockIfRequisitionNotEditable: function (formContext) {\n    var parentAttr = formContext.getAttribute('wksp_parentrequisitionid');\n    if (!parentAttr) return;\n    var parentRef = parentAttr.getValue();\n    if (!parentRef || !parentRef[0]) return;\n    Xrm.WebApi.retrieveRecord('wksp_requisition', parentRef[0].id, '?$select=wksp_status').then(\n      function (result) {\n        var DRAFT = 100000000, SUBMITTED = 100000001;\n        if (result.wksp_status === DRAFT || result.wksp_status === SUBMITTED) return;\n        formContext.ui.controls.forEach(function (control) {\n          if (control.setDisabled) control.setDisabled(true);\n        });\n      },\n      function () { /* new/unsaved parent - leave editable */ }\n    );\n  }\n};"
+    }
+  ],
+  "views": [
+    {
+      "entity": "wksp_requisition",
+      "name": "My Requisitions",
+      "columns": [
+        "wksp_requisitionnumber",
+        "wksp_status",
+        "wksp_totalvalue",
+        "wksp_supplierid",
+        "wksp_datesubmitted"
+      ],
+      "filters": [
+        {
+          "attr": "wksp_requesterid",
+          "op": "eq-userid"
+        }
+      ]
+    },
+    {
+      "entity": "wksp_requisition",
+      "name": "Pending Approval",
+      "columns": [
+        "wksp_requisitionnumber",
+        "wksp_requesterid",
+        "wksp_totalvalue",
+        "wksp_valuetier",
+        "wksp_datesubmitted"
+      ],
+      "filters": [
+        {
+          "attr": "wksp_status",
+          "op": "eq",
+          "value": "In Approval"
+        },
+        {
+          "attr": "wksp_currentapproverid",
+          "op": "eq-userid"
+        }
+      ]
+    },
+    {
+      "entity": "wksp_requisition",
+      "name": "Approved This Month",
+      "columns": [
+        "wksp_requisitionnumber",
+        "wksp_requesterid",
+        "wksp_totalvalue",
+        "wksp_supplierid",
+        "wksp_datesubmitted"
+      ],
+      "filters": [
+        {
+          "attr": "wksp_status",
+          "op": "eq",
+          "value": "Approved"
+        },
+        {
+          "attr": "modifiedon",
+          "op": "this-month"
+        }
+      ]
+    },
+    {
+      "entity": "wksp_requisition",
+      "name": "All Requisitions",
+      "columns": [
+        "wksp_requisitionnumber",
+        "wksp_status",
+        "wksp_requesterid",
+        "wksp_totalvalue",
+        "wksp_supplierid",
+        "wksp_datesubmitted"
+      ]
+    }
+  ],
+  "forms": [
+    {
+      "entity": "wksp_requisition",
+      "type": "main",
+      "name": "Requisition",
+      "tabs": [
+        {
+          "label": "General",
+          "sections": [
+            {
+              "label": "Overview",
+              "columns": 2,
+              "fields": [
+                "wksp_requisitionnumber",
+                "wksp_status",
+                "wksp_totalvalue",
+                "wksp_valuetier",
+                "wksp_requesterid",
+                "wksp_datesubmitted"
+              ]
+            },
+            {
+              "label": "Details",
+              "columns": 2,
+              "fields": [
+                "wksp_supplierid",
+                "wksp_justification",
+                "wksp_currentapproverid"
+              ]
+            }
+          ]
+        }
+      ],
+      "subgrids": [
+        {
+          "childEntity": "wksp_requisitionlineitem",
+          "view": "Active Requisition Line Item",
+          "label": "Line Items"
+        },
+        {
+          "childEntity": "wksp_approvalhistory",
+          "view": "Active Approval History",
+          "label": "Approval History"
+        }
+      ],
+      "events": [
+        {
+          "event": "onload",
+          "library": "wksp_requisition.js",
+          "function": "Wksp.Requisition.onLoad"
+        },
+        {
+          "event": "onchange",
+          "attribute": "wksp_status",
+          "library": "wksp_requisition.js",
+          "function": "Wksp.Requisition.onStatusChange"
+        },
+        {
+          "event": "onchange",
+          "attribute": "wksp_totalvalue",
+          "library": "wksp_requisition.js",
+          "function": "Wksp.Requisition.onTotalValueChange"
+        }
+      ]
+    },
+    {
+      "entity": "wksp_requisitionlineitem",
+      "type": "main",
+      "name": "Requisition Line Item",
+      "layout": "auto",
+      "events": [
+        {
+          "event": "onload",
+          "library": "wksp_requisition.js",
+          "function": "Wksp.LineItem.onLoad"
+        },
+        {
+          "event": "onchange",
+          "attribute": "wksp_quantity",
+          "library": "wksp_requisition.js",
+          "function": "Wksp.LineItem.onQuantityOrPriceChange"
+        },
+        {
+          "event": "onchange",
+          "attribute": "wksp_unitprice",
+          "library": "wksp_requisition.js",
+          "function": "Wksp.LineItem.onQuantityOrPriceChange"
+        }
+      ]
+    },
+    {
+      "entity": "wksp_supplier",
+      "type": "main",
+      "name": "Supplier",
+      "layout": "auto"
+    },
+    {
+      "entity": "wksp_approvalhistory",
+      "type": "main",
+      "name": "Approval History",
+      "layout": "auto"
+    }
+  ],
+  "pages": [
+    {
+      "key": "requisition-analytics",
+      "name": "Requisition Analytics",
+      "purpose": "KPI overview of requisitions by status, value tier, and month, with a quick view of what is currently pending approval.",
+      "dataSources": [
+        "wksp_requisition"
+      ],
+      "source": {
+        "kind": "tsx",
+        "codeFile": "requisition-analytics.tsx"
+      }
+    }
+  ],
+  "appShell": {
+    "areas": [
+      {
+        "label": "Main",
+        "groups": [
+          {
+            "label": "Requisitions",
+            "subAreas": [
+              {
+                "entity": "wksp_requisition",
+                "title": "Requisitions"
+              },
+              {
+                "page": "requisition-analytics",
+                "title": "Dashboards"
+              }
+            ]
+          },
+          {
+            "label": "Suppliers",
+            "subAreas": [
+              {
+                "entity": "wksp_supplier",
+                "title": "Suppliers"
+              }
+            ]
+          },
+          {
+            "label": "Approval History",
+            "subAreas": [
+              {
+                "entity": "wksp_approvalhistory",
+                "title": "Approval History"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "personas": [
+    {
+      "persona": "Requester",
+      "jobs": [
+        {
+          "name": "Raise a requisition",
+          "surfaces": [
+            "Requisition",
+            "Requisition Line Item"
+          ],
+          "privileges": [
+            {
+              "entity": "wksp_requisition",
+              "access": [
+                "read",
+                "create",
+                "write"
+              ],
+              "scope": "user"
+            },
+            {
+              "entity": "wksp_requisitionlineitem",
+              "access": [
+                "read",
+                "create",
+                "write"
+              ],
+              "scope": "user"
+            },
+            {
+              "entity": "wksp_supplier",
+              "access": [
+                "read"
+              ],
+              "scope": "organization"
+            }
+          ]
+        },
+        {
+          "name": "Track requisition status and view analytics",
+          "surfaces": [
+            "My Requisitions",
+            "Dashboards"
+          ],
+          "privileges": [
+            {
+              "entity": "wksp_requisition",
+              "access": [
+                "read"
+              ],
+              "scope": "organization"
+            },
+            {
+              "entity": "wksp_approvalhistory",
+              "access": [
+                "read"
+              ],
+              "scope": "organization"
+            }
+          ]
+        }
+      ],
+      "appAccess": true
+    },
+    {
+      "persona": "Workshop Supervisor",
+      "jobs": [
+        {
+          "name": "Approve low-value requisitions (under 1,000 AED)",
+          "surfaces": [
+            "Pending Approval",
+            "Requisition",
+            "Dashboards"
+          ],
+          "privileges": [
+            {
+              "entity": "wksp_requisition",
+              "access": [
+                "read"
+              ],
+              "scope": "organization"
+            },
+            {
+              "entity": "wksp_requisitionlineitem",
+              "access": [
+                "read"
+              ],
+              "scope": "organization"
+            },
+            {
+              "entity": "wksp_approvalhistory",
+              "access": [
+                "read",
+                "create"
+              ],
+              "scope": "organization"
+            },
+            {
+              "entity": "wksp_supplier",
+              "access": [
+                "read"
+              ],
+              "scope": "organization"
+            }
+          ]
+        }
+      ],
+      "appAccess": true
+    },
+    {
+      "persona": "Workshop Manager",
+      "jobs": [
+        {
+          "name": "Approve mid-value requisitions and the first stage of high-value requisitions",
+          "surfaces": [
+            "Pending Approval",
+            "Requisition",
+            "Dashboards"
+          ],
+          "privileges": [
+            {
+              "entity": "wksp_requisition",
+              "access": [
+                "read"
+              ],
+              "scope": "organization"
+            },
+            {
+              "entity": "wksp_requisitionlineitem",
+              "access": [
+                "read"
+              ],
+              "scope": "organization"
+            },
+            {
+              "entity": "wksp_approvalhistory",
+              "access": [
+                "read",
+                "create"
+              ],
+              "scope": "organization"
+            },
+            {
+              "entity": "wksp_supplier",
+              "access": [
+                "read"
+              ],
+              "scope": "organization"
+            }
+          ]
+        }
+      ],
+      "appAccess": true
+    },
+    {
+      "persona": "Finance Controller",
+      "jobs": [
+        {
+          "name": "Approve the second stage of high-value requisitions (above 10,000 AED)",
+          "surfaces": [
+            "Pending Approval",
+            "Requisition",
+            "Dashboards"
+          ],
+          "privileges": [
+            {
+              "entity": "wksp_requisition",
+              "access": [
+                "read"
+              ],
+              "scope": "organization"
+            },
+            {
+              "entity": "wksp_requisitionlineitem",
+              "access": [
+                "read"
+              ],
+              "scope": "organization"
+            },
+            {
+              "entity": "wksp_approvalhistory",
+              "access": [
+                "read",
+                "create"
+              ],
+              "scope": "organization"
+            },
+            {
+              "entity": "wksp_supplier",
+              "access": [
+                "read"
+              ],
+              "scope": "organization"
+            }
+          ]
+        }
+      ],
+      "appAccess": true
+    },
+    {
+      "persona": "Procurement Officer",
+      "jobs": [
+        {
+          "name": "Process approved requisitions through Ordered and Received",
+          "surfaces": [
+            "All Requisitions",
+            "Requisition",
+            "Dashboards"
+          ],
+          "privileges": [
+            {
+              "entity": "wksp_requisition",
+              "access": [
+                "read",
+                "write"
+              ],
+              "scope": "organization"
+            },
+            {
+              "entity": "wksp_requisitionlineitem",
+              "access": [
+                "read"
+              ],
+              "scope": "organization"
+            },
+            {
+              "entity": "wksp_approvalhistory",
+              "access": [
+                "read"
+              ],
+              "scope": "organization"
+            }
+          ]
+        },
+        {
+          "name": "Maintain the supplier list",
+          "surfaces": [
+            "Suppliers",
+            "Supplier"
+          ],
+          "privileges": [
+            {
+              "entity": "wksp_supplier",
+              "access": [
+                "read",
+                "create",
+                "write"
+              ],
+              "scope": "organization"
+            }
+          ]
+        }
+      ],
+      "appAccess": true
+    }
+  ]
+}
