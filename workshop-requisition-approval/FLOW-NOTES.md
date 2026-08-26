@@ -20,6 +20,44 @@
 - Polling interval is 1 minute — adjust `triggers.Recurrence.recurrence.interval` if a
   faster or slower cadence is wanted. This trades near-real-time response for reliability,
   since the native Dataverse webhook trigger is broken in this environment (see below).
+- The loop's concurrency is set to sequential (`runtimeConfiguration.concurrency.repetitions: 1`).
+  Early testing dumped several requisitions into "Submitted" simultaneously, and the
+  default parallel `Apply to each` (up to 20 concurrent branches) caused a real race
+  condition on the shared `TotalValue` variable, plus Dataverse write throttling that left
+  two branches stuck mid-execution. Sequential processing fixed this; real-world usage
+  won't normally have bursts like that, but sequential is the correct setting regardless.
+
+## Known issue: outbound email doesn't send (Office 365 Outlook connector)
+
+Every `SendEmailV2` action in the flow (approval/rejection notifications at every tier)
+fails with a generic `NotFound` error. This was root-caused, not just retried around:
+
+- The Office 365 Outlook connection reference (`vg_Outlook`) reported `Connected` via
+  every API-level check (`list_connections`, `test_connection`), which turned out to be
+  misleading.
+- Two replacement connections were created via the Power Automate management API
+  ("silent" auth) and both failed identically at runtime.
+- A **third connection was created through the actual browser UI with a real interactive
+  sign-in** (not an API shortcut) for `you@yourtenant.onmicrosoft.com`,
+  and even that failed at connector's own connection test with "Connection test failed.
+  Please review your configuration and try again."
+- **Conclusion:** this is not a flow, connection-reference, or automation-tooling problem.
+  The Office 365 Outlook connector cannot establish a working connection for this
+  account at all — almost certainly because the account has no Exchange Online
+  mailbox/license provisioned in this tenant (common for a Power Platform trial/dev
+  tenant that only has Dataverse/Power Apps licensing). The account does have *a* mailbox
+  reachable via outlook.office.com in the browser, but that doesn't mean the Outlook
+  *connector* (which needs Exchange Online/Graph API mail-send permissions) can use it.
+
+**Status: left unresolved by user decision (2026-08-26).** All non-email behavior (status
+transitions, tiered approver assignment, Approvals connector cards, approval-history audit
+trail) works correctly and independently of this — email sending is the only broken piece.
+To fix: assign an Exchange Online (or Microsoft 365) license to the account in the
+Microsoft 365 admin center, or rebuild the Office 365 Outlook connection under a different
+account that has a real mailbox, then retest `SendEmailV2` (a throwaway flow with just a
+manual trigger + one `Send an email (V2)` action is the fastest way to isolate this from
+the rest of the approval logic — see the disabled `Email Diagnostic Test` flow,
+ID `2eeb784d-e4e8-ecee-9dc9-5f80615af52b`, in this environment).
 
 ## Superseded/disabled flows
 - **Workshop Requisition Approval Routing** (original webhook-trigger flow)

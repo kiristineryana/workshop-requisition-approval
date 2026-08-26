@@ -1067,7 +1067,12 @@
           "Succeeded"
         ]
       },
-      "type": "Foreach"
+      "type": "Foreach",
+      "runtimeConfiguration": {
+        "concurrency": {
+          "repetitions": 1
+        }
+      }
     }
   }
 }
