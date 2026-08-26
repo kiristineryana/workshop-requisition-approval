@@ -5,7 +5,7 @@
 - **Flow ID:** `1a166da3-40a1-f111-b8de-002248e81844`
 - **Environment:** my_dev (`00000000-0000-0000-0000-000000000000`)
 - **State:** Started
-- **Trigger:** Recurrence, every 5 minutes → List Rows (Requisitions, filtered
+- **Trigger:** Recurrence, every 1 minute → List Rows (Requisitions, filtered
   `wksp_status eq 100000001`) → Apply to each → same tiered-approval logic as the
   original design (every `triggerBody()` reference converted to
   `items('Apply_to_each_Requisition')`).
@@ -17,7 +17,7 @@
   Supervisor as Current Approver, and reached the Approvals connector wait step —
   confirmed via direct Dataverse query (`modifiedon`, `wksp_status`,
   `_wksp_currentapproverid_value` all updated as expected).
-- Polling interval is 5 minutes — adjust `triggers.Recurrence.recurrence.interval` if a
+- Polling interval is 1 minute — adjust `triggers.Recurrence.recurrence.interval` if a
   faster or slower cadence is wanted. This trades near-real-time response for reliability,
   since the native Dataverse webhook trigger is broken in this environment (see below).
 
