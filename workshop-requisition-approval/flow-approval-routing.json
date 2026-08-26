@@ -12,31 +12,70 @@
     }
   },
   "triggers": {
-    "When_a_row_is_added_modified_or_deleted": {
-      "splitOn": "@triggerOutputs()?['body/value']",
-      "type": "OpenApiConnectionWebhook",
+    "Recurrence": {
+      "recurrence": {
+        "frequency": "Minute",
+        "interval": 5
+      },
+      "evaluatedRecurrence": {
+        "frequency": "Minute",
+        "interval": 5
+      },
+      "type": "Recurrence"
+    }
+  },
+  "actions": {
+    "Initialize_TotalValue": {
+      "runAfter": {},
+      "type": "InitializeVariable",
+      "inputs": {
+        "variables": [
+          {
+            "name": "TotalValue",
+            "type": "float",
+            "value": 0
+          }
+        ]
+      }
+    },
+    "List_Submitted_Requisitions": {
+      "runAfter": {
+        "Initialize_TotalValue": [
+          "Succeeded"
+        ]
+      },
+      "type": "OpenApiConnection",
       "inputs": {
         "host": {
           "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
           "connectionName": "shared_commondataserviceforapps",
-          "operationId": "SubscribeWebhookTrigger"
+          "operationId": "ListRecords"
         },
         "parameters": {
-          "subscriptionRequest/message": 4,
-          "subscriptionRequest/entityname": "wksp_requisition",
-          "subscriptionRequest/scope": 4,
-          "subscriptionRequest/filteringattributes": "wksp_status",
-          "subscriptionRequest/name": "afb168da-3ca1-f111-b8de-002248e81844:MTA"
+          "entityName": "wksp_requisitions",
+          "$filter": "wksp_status eq 100000001",
+          "$select": "wksp_requisitionid,wksp_requisitionnumber,wksp_justification,_wksp_requesterid_value"
         },
         "authentication": "@parameters('$authentication')"
       }
-    }
-  },
-  "actions": {
-    "Is_Submitted": {
+    },
+    "Apply_to_each_Requisition": {
+      "foreach": "@body('List_Submitted_Requisitions')?['value']",
       "actions": {
-        "List_Line_Items": {
+        "Reset_TotalValue": {
           "runAfter": {},
+          "type": "SetVariable",
+          "inputs": {
+            "name": "TotalValue",
+            "value": 0
+          }
+        },
+        "List_Line_Items": {
+          "runAfter": {
+            "Reset_TotalValue": [
+              "Succeeded"
+            ]
+          },
           "type": "OpenApiConnection",
           "inputs": {
             "host": {
@@ -46,7 +85,7 @@
             },
             "parameters": {
               "entityName": "wksp_requisitionlineitems",
-              "$filter": "@concat('_wksp_parentrequisitionid_value eq ', triggerBody()?['wksp_requisitionid'])",
+              "$filter": "@concat('_wksp_parentrequisitionid_value eq ', items('Apply_to_each_Requisition')?['wksp_requisitionid'])",
               "$select": "wksp_linetotal"
             },
             "authentication": "@parameters('$authentication')"
@@ -86,7 +125,7 @@
             },
             "parameters": {
               "entityName": "systemusers",
-              "recordId": "@triggerBody()?['_wksp_requesterid_value']",
+              "recordId": "@items('Apply_to_each_Requisition')?['_wksp_requesterid_value']",
               "$select": "internalemailaddress,fullname"
             },
             "authentication": "@parameters('$authentication')"
@@ -105,7 +144,7 @@
                 },
                 "parameters": {
                   "entityName": "wksp_requisitions",
-                  "recordId": "@triggerBody()?['wksp_requisitionid']",
+                  "recordId": "@items('Apply_to_each_Requisition')?['wksp_requisitionid']",
                   "item/wksp_totalvalue": "@variables('TotalValue')",
                   "item/wksp_valuetier": 100000000,
                   "item/wksp_status": 100000002,
@@ -171,7 +210,7 @@
                     },
                     "parameters": {
                       "entityName": "wksp_requisitions",
-                      "recordId": "@triggerBody()?['wksp_requisitionid']",
+                      "recordId": "@items('Apply_to_each_Requisition')?['wksp_requisitionid']",
                       "item/wksp_CurrentApproverId@odata.bind": "@concat('systemusers(', first(body('Get_Supervisor_User')?['value'])?['systemuserid'], ')')"
                     },
                     "authentication": "@parameters('$authentication')"
@@ -192,9 +231,9 @@
                     },
                     "parameters": {
                       "approvalType": "Basic",
-                      "WebhookApprovalCreationInput/title": "@concat('Approve requisition ', triggerBody()?['wksp_requisitionnumber'])",
+                      "WebhookApprovalCreationInput/title": "@concat('Approve requisition ', items('Apply_to_each_Requisition')?['wksp_requisitionnumber'])",
                       "WebhookApprovalCreationInput/assignedTo": "@first(body('Get_Supervisor_Email')?['value'])?['value']",
-                      "WebhookApprovalCreationInput/details": "@concat('Requested by ', body('Get_Requester')?['fullname'], '. Total value: AED ', string(variables('TotalValue')), '. Justification: ', coalesce(triggerBody()?['wksp_justification'], 'n/a'))"
+                      "WebhookApprovalCreationInput/details": "@concat('Requested by ', body('Get_Requester')?['fullname'], '. Total value: AED ', string(variables('TotalValue')), '. Justification: ', coalesce(items('Apply_to_each_Requisition')?['wksp_justification'], 'n/a'))"
                     },
                     "authentication": "@parameters('$authentication')"
                   }
@@ -218,7 +257,7 @@
                       "item/wksp_action": "@if(equals(body('Start_Wait_Supervisor')?['outcome'], 'Approve'), 100000000, 100000001)",
                       "item/wksp_comment": "@coalesce(first(body('Start_Wait_Supervisor')?['responses'])?['comments'], '')",
                       "item/wksp_decisiondate": "@utcNow()",
-                      "item/wksp_RequisitionId@odata.bind": "@concat('wksp_requisitions(', triggerBody()?['wksp_requisitionid'], ')')",
+                      "item/wksp_RequisitionId@odata.bind": "@concat('wksp_requisitions(', items('Apply_to_each_Requisition')?['wksp_requisitionid'], ')')",
                       "item/wksp_ApproverId@odata.bind": "@concat('systemusers(', first(body('Get_Supervisor_User')?['value'])?['systemuserid'], ')')"
                     },
                     "authentication": "@parameters('$authentication')"
@@ -237,7 +276,7 @@
                         },
                         "parameters": {
                           "entityName": "wksp_requisitions",
-                          "recordId": "@triggerBody()?['wksp_requisitionid']",
+                          "recordId": "@items('Apply_to_each_Requisition')?['wksp_requisitionid']",
                           "item/wksp_status": 100000004
                         },
                         "authentication": "@parameters('$authentication')"
@@ -258,8 +297,8 @@
                         },
                         "parameters": {
                           "emailMessage/To": "@body('Get_Requester')?['internalemailaddress']",
-                          "emailMessage/Subject": "@concat('Requisition ', triggerBody()?['wksp_requisitionnumber'], ' was rejected')",
-                          "emailMessage/Body": "@concat('<p>Your requisition ', triggerBody()?['wksp_requisitionnumber'], ' was rejected by the Workshop Supervisor.</p><p>Comment: ', coalesce(first(body('Start_Wait_Supervisor')?['responses'])?['comments'], 'No comment provided.'), '</p>')"
+                          "emailMessage/Subject": "@concat('Requisition ', items('Apply_to_each_Requisition')?['wksp_requisitionnumber'], ' was rejected')",
+                          "emailMessage/Body": "@concat('<p>Your requisition ', items('Apply_to_each_Requisition')?['wksp_requisitionnumber'], ' was rejected by the Workshop Supervisor.</p><p>Comment: ', coalesce(first(body('Start_Wait_Supervisor')?['responses'])?['comments'], 'No comment provided.'), '</p>')"
                         },
                         "authentication": "@parameters('$authentication')"
                       }
@@ -283,7 +322,7 @@
                           },
                           "parameters": {
                             "entityName": "wksp_requisitions",
-                            "recordId": "@triggerBody()?['wksp_requisitionid']",
+                            "recordId": "@items('Apply_to_each_Requisition')?['wksp_requisitionid']",
                             "item/wksp_status": 100000003
                           },
                           "authentication": "@parameters('$authentication')"
@@ -304,8 +343,8 @@
                           },
                           "parameters": {
                             "emailMessage/To": "@body('Get_Requester')?['internalemailaddress']",
-                            "emailMessage/Subject": "@concat('Requisition ', triggerBody()?['wksp_requisitionnumber'], ' approved - proceeding to procurement')",
-                            "emailMessage/Body": "@concat('<p>Your requisition ', triggerBody()?['wksp_requisitionnumber'], ' has been approved and will now proceed to procurement.</p>')"
+                            "emailMessage/Subject": "@concat('Requisition ', items('Apply_to_each_Requisition')?['wksp_requisitionnumber'], ' approved - proceeding to procurement')",
+                            "emailMessage/Body": "@concat('<p>Your requisition ', items('Apply_to_each_Requisition')?['wksp_requisitionnumber'], ' has been approved and will now proceed to procurement.</p>')"
                           },
                           "authentication": "@parameters('$authentication')"
                         }
@@ -353,7 +392,7 @@
                       },
                       "parameters": {
                         "entityName": "wksp_requisitions",
-                        "recordId": "@triggerBody()?['wksp_requisitionid']",
+                        "recordId": "@items('Apply_to_each_Requisition')?['wksp_requisitionid']",
                         "item/wksp_totalvalue": "@variables('TotalValue')",
                         "item/wksp_valuetier": 100000001,
                         "item/wksp_status": 100000002,
@@ -419,7 +458,7 @@
                           },
                           "parameters": {
                             "entityName": "wksp_requisitions",
-                            "recordId": "@triggerBody()?['wksp_requisitionid']",
+                            "recordId": "@items('Apply_to_each_Requisition')?['wksp_requisitionid']",
                             "item/wksp_CurrentApproverId@odata.bind": "@concat('systemusers(', first(body('Get_Manager_User_A')?['value'])?['systemuserid'], ')')"
                           },
                           "authentication": "@parameters('$authentication')"
@@ -440,9 +479,9 @@
                           },
                           "parameters": {
                             "approvalType": "Basic",
-                            "WebhookApprovalCreationInput/title": "@concat('Approve requisition ', triggerBody()?['wksp_requisitionnumber'])",
+                            "WebhookApprovalCreationInput/title": "@concat('Approve requisition ', items('Apply_to_each_Requisition')?['wksp_requisitionnumber'])",
                             "WebhookApprovalCreationInput/assignedTo": "@first(body('Get_Manager_Email_A')?['value'])?['value']",
-                            "WebhookApprovalCreationInput/details": "@concat('Requested by ', body('Get_Requester')?['fullname'], '. Total value: AED ', string(variables('TotalValue')), '. Justification: ', coalesce(triggerBody()?['wksp_justification'], 'n/a'))"
+                            "WebhookApprovalCreationInput/details": "@concat('Requested by ', body('Get_Requester')?['fullname'], '. Total value: AED ', string(variables('TotalValue')), '. Justification: ', coalesce(items('Apply_to_each_Requisition')?['wksp_justification'], 'n/a'))"
                           },
                           "authentication": "@parameters('$authentication')"
                         }
@@ -466,7 +505,7 @@
                             "item/wksp_action": "@if(equals(body('Start_Wait_Manager_A')?['outcome'], 'Approve'), 100000000, 100000001)",
                             "item/wksp_comment": "@coalesce(first(body('Start_Wait_Manager_A')?['responses'])?['comments'], '')",
                             "item/wksp_decisiondate": "@utcNow()",
-                            "item/wksp_RequisitionId@odata.bind": "@concat('wksp_requisitions(', triggerBody()?['wksp_requisitionid'], ')')",
+                            "item/wksp_RequisitionId@odata.bind": "@concat('wksp_requisitions(', items('Apply_to_each_Requisition')?['wksp_requisitionid'], ')')",
                             "item/wksp_ApproverId@odata.bind": "@concat('systemusers(', first(body('Get_Manager_User_A')?['value'])?['systemuserid'], ')')"
                           },
                           "authentication": "@parameters('$authentication')"
@@ -485,7 +524,7 @@
                               },
                               "parameters": {
                                 "entityName": "wksp_requisitions",
-                                "recordId": "@triggerBody()?['wksp_requisitionid']",
+                                "recordId": "@items('Apply_to_each_Requisition')?['wksp_requisitionid']",
                                 "item/wksp_status": 100000004
                               },
                               "authentication": "@parameters('$authentication')"
@@ -506,8 +545,8 @@
                               },
                               "parameters": {
                                 "emailMessage/To": "@body('Get_Requester')?['internalemailaddress']",
-                                "emailMessage/Subject": "@concat('Requisition ', triggerBody()?['wksp_requisitionnumber'], ' was rejected')",
-                                "emailMessage/Body": "@concat('<p>Your requisition ', triggerBody()?['wksp_requisitionnumber'], ' was rejected by the Workshop Manager.</p><p>Comment: ', coalesce(first(body('Start_Wait_Manager_A')?['responses'])?['comments'], 'No comment provided.'), '</p>')"
+                                "emailMessage/Subject": "@concat('Requisition ', items('Apply_to_each_Requisition')?['wksp_requisitionnumber'], ' was rejected')",
+                                "emailMessage/Body": "@concat('<p>Your requisition ', items('Apply_to_each_Requisition')?['wksp_requisitionnumber'], ' was rejected by the Workshop Manager.</p><p>Comment: ', coalesce(first(body('Start_Wait_Manager_A')?['responses'])?['comments'], 'No comment provided.'), '</p>')"
                               },
                               "authentication": "@parameters('$authentication')"
                             }
@@ -531,7 +570,7 @@
                                 },
                                 "parameters": {
                                   "entityName": "wksp_requisitions",
-                                  "recordId": "@triggerBody()?['wksp_requisitionid']",
+                                  "recordId": "@items('Apply_to_each_Requisition')?['wksp_requisitionid']",
                                   "item/wksp_status": 100000003
                                 },
                                 "authentication": "@parameters('$authentication')"
@@ -552,8 +591,8 @@
                                 },
                                 "parameters": {
                                   "emailMessage/To": "@body('Get_Requester')?['internalemailaddress']",
-                                  "emailMessage/Subject": "@concat('Requisition ', triggerBody()?['wksp_requisitionnumber'], ' approved - proceeding to procurement')",
-                                  "emailMessage/Body": "@concat('<p>Your requisition ', triggerBody()?['wksp_requisitionnumber'], ' has been approved and will now proceed to procurement.</p>')"
+                                  "emailMessage/Subject": "@concat('Requisition ', items('Apply_to_each_Requisition')?['wksp_requisitionnumber'], ' approved - proceeding to procurement')",
+                                  "emailMessage/Body": "@concat('<p>Your requisition ', items('Apply_to_each_Requisition')?['wksp_requisitionnumber'], ' has been approved and will now proceed to procurement.</p>')"
                                 },
                                 "authentication": "@parameters('$authentication')"
                               }
@@ -595,7 +634,7 @@
                         },
                         "parameters": {
                           "entityName": "wksp_requisitions",
-                          "recordId": "@triggerBody()?['wksp_requisitionid']",
+                          "recordId": "@items('Apply_to_each_Requisition')?['wksp_requisitionid']",
                           "item/wksp_totalvalue": "@variables('TotalValue')",
                           "item/wksp_valuetier": 100000002,
                           "item/wksp_status": 100000002,
@@ -661,7 +700,7 @@
                             },
                             "parameters": {
                               "entityName": "wksp_requisitions",
-                              "recordId": "@triggerBody()?['wksp_requisitionid']",
+                              "recordId": "@items('Apply_to_each_Requisition')?['wksp_requisitionid']",
                               "item/wksp_CurrentApproverId@odata.bind": "@concat('systemusers(', first(body('Get_Manager_User_B')?['value'])?['systemuserid'], ')')"
                             },
                             "authentication": "@parameters('$authentication')"
@@ -682,9 +721,9 @@
                             },
                             "parameters": {
                               "approvalType": "Basic",
-                              "WebhookApprovalCreationInput/title": "@concat('Approve requisition ', triggerBody()?['wksp_requisitionnumber'], ' (stage 1 of 2)')",
+                              "WebhookApprovalCreationInput/title": "@concat('Approve requisition ', items('Apply_to_each_Requisition')?['wksp_requisitionnumber'], ' (stage 1 of 2)')",
                               "WebhookApprovalCreationInput/assignedTo": "@first(body('Get_Manager_Email_B')?['value'])?['value']",
-                              "WebhookApprovalCreationInput/details": "@concat('Requested by ', body('Get_Requester')?['fullname'], '. Total value: AED ', string(variables('TotalValue')), '. Justification: ', coalesce(triggerBody()?['wksp_justification'], 'n/a'), '. This request also needs Finance Controller approval after yours.')"
+                              "WebhookApprovalCreationInput/details": "@concat('Requested by ', body('Get_Requester')?['fullname'], '. Total value: AED ', string(variables('TotalValue')), '. Justification: ', coalesce(items('Apply_to_each_Requisition')?['wksp_justification'], 'n/a'), '. This request also needs Finance Controller approval after yours.')"
                             },
                             "authentication": "@parameters('$authentication')"
                           }
@@ -708,7 +747,7 @@
                               "item/wksp_action": "@if(equals(body('Start_Wait_Manager_B')?['outcome'], 'Approve'), 100000000, 100000001)",
                               "item/wksp_comment": "@coalesce(first(body('Start_Wait_Manager_B')?['responses'])?['comments'], '')",
                               "item/wksp_decisiondate": "@utcNow()",
-                              "item/wksp_RequisitionId@odata.bind": "@concat('wksp_requisitions(', triggerBody()?['wksp_requisitionid'], ')')",
+                              "item/wksp_RequisitionId@odata.bind": "@concat('wksp_requisitions(', items('Apply_to_each_Requisition')?['wksp_requisitionid'], ')')",
                               "item/wksp_ApproverId@odata.bind": "@concat('systemusers(', first(body('Get_Manager_User_B')?['value'])?['systemuserid'], ')')"
                             },
                             "authentication": "@parameters('$authentication')"
@@ -727,7 +766,7 @@
                                 },
                                 "parameters": {
                                   "entityName": "wksp_requisitions",
-                                  "recordId": "@triggerBody()?['wksp_requisitionid']",
+                                  "recordId": "@items('Apply_to_each_Requisition')?['wksp_requisitionid']",
                                   "item/wksp_status": 100000004
                                 },
                                 "authentication": "@parameters('$authentication')"
@@ -748,8 +787,8 @@
                                 },
                                 "parameters": {
                                   "emailMessage/To": "@body('Get_Requester')?['internalemailaddress']",
-                                  "emailMessage/Subject": "@concat('Requisition ', triggerBody()?['wksp_requisitionnumber'], ' was rejected')",
-                                  "emailMessage/Body": "@concat('<p>Your requisition ', triggerBody()?['wksp_requisitionnumber'], ' was rejected by the Workshop Manager.</p><p>Comment: ', coalesce(first(body('Start_Wait_Manager_B')?['responses'])?['comments'], 'No comment provided.'), '</p>')"
+                                  "emailMessage/Subject": "@concat('Requisition ', items('Apply_to_each_Requisition')?['wksp_requisitionnumber'], ' was rejected')",
+                                  "emailMessage/Body": "@concat('<p>Your requisition ', items('Apply_to_each_Requisition')?['wksp_requisitionnumber'], ' was rejected by the Workshop Manager.</p><p>Comment: ', coalesce(first(body('Start_Wait_Manager_B')?['responses'])?['comments'], 'No comment provided.'), '</p>')"
                                 },
                                 "authentication": "@parameters('$authentication')"
                               }
@@ -819,7 +858,7 @@
                                       },
                                       "parameters": {
                                         "entityName": "wksp_requisitions",
-                                        "recordId": "@triggerBody()?['wksp_requisitionid']",
+                                        "recordId": "@items('Apply_to_each_Requisition')?['wksp_requisitionid']",
                                         "item/wksp_CurrentApproverId@odata.bind": "@concat('systemusers(', first(body('Get_Finance_User')?['value'])?['systemuserid'], ')')"
                                       },
                                       "authentication": "@parameters('$authentication')"
@@ -840,9 +879,9 @@
                                       },
                                       "parameters": {
                                         "approvalType": "Basic",
-                                        "WebhookApprovalCreationInput/title": "@concat('Approve requisition ', triggerBody()?['wksp_requisitionnumber'], ' (stage 2 of 2)')",
+                                        "WebhookApprovalCreationInput/title": "@concat('Approve requisition ', items('Apply_to_each_Requisition')?['wksp_requisitionnumber'], ' (stage 2 of 2)')",
                                         "WebhookApprovalCreationInput/assignedTo": "@first(body('Get_Finance_Email')?['value'])?['value']",
-                                        "WebhookApprovalCreationInput/details": "@concat('Requested by ', body('Get_Requester')?['fullname'], '. Total value: AED ', string(variables('TotalValue')), '. Justification: ', coalesce(triggerBody()?['wksp_justification'], 'n/a'), '. Already approved by the Workshop Manager.')"
+                                        "WebhookApprovalCreationInput/details": "@concat('Requested by ', body('Get_Requester')?['fullname'], '. Total value: AED ', string(variables('TotalValue')), '. Justification: ', coalesce(items('Apply_to_each_Requisition')?['wksp_justification'], 'n/a'), '. Already approved by the Workshop Manager.')"
                                       },
                                       "authentication": "@parameters('$authentication')"
                                     }
@@ -866,7 +905,7 @@
                                         "item/wksp_action": "@if(equals(body('Start_Wait_Finance')?['outcome'], 'Approve'), 100000000, 100000001)",
                                         "item/wksp_comment": "@coalesce(first(body('Start_Wait_Finance')?['responses'])?['comments'], '')",
                                         "item/wksp_decisiondate": "@utcNow()",
-                                        "item/wksp_RequisitionId@odata.bind": "@concat('wksp_requisitions(', triggerBody()?['wksp_requisitionid'], ')')",
+                                        "item/wksp_RequisitionId@odata.bind": "@concat('wksp_requisitions(', items('Apply_to_each_Requisition')?['wksp_requisitionid'], ')')",
                                         "item/wksp_ApproverId@odata.bind": "@concat('systemusers(', first(body('Get_Finance_User')?['value'])?['systemuserid'], ')')"
                                       },
                                       "authentication": "@parameters('$authentication')"
@@ -885,7 +924,7 @@
                                           },
                                           "parameters": {
                                             "entityName": "wksp_requisitions",
-                                            "recordId": "@triggerBody()?['wksp_requisitionid']",
+                                            "recordId": "@items('Apply_to_each_Requisition')?['wksp_requisitionid']",
                                             "item/wksp_status": 100000004
                                           },
                                           "authentication": "@parameters('$authentication')"
@@ -906,8 +945,8 @@
                                           },
                                           "parameters": {
                                             "emailMessage/To": "@body('Get_Requester')?['internalemailaddress']",
-                                            "emailMessage/Subject": "@concat('Requisition ', triggerBody()?['wksp_requisitionnumber'], ' was rejected')",
-                                            "emailMessage/Body": "@concat('<p>Your requisition ', triggerBody()?['wksp_requisitionnumber'], ' was rejected by the Finance Controller.</p><p>Comment: ', coalesce(first(body('Start_Wait_Finance')?['responses'])?['comments'], 'No comment provided.'), '</p>')"
+                                            "emailMessage/Subject": "@concat('Requisition ', items('Apply_to_each_Requisition')?['wksp_requisitionnumber'], ' was rejected')",
+                                            "emailMessage/Body": "@concat('<p>Your requisition ', items('Apply_to_each_Requisition')?['wksp_requisitionnumber'], ' was rejected by the Finance Controller.</p><p>Comment: ', coalesce(first(body('Start_Wait_Finance')?['responses'])?['comments'], 'No comment provided.'), '</p>')"
                                           },
                                           "authentication": "@parameters('$authentication')"
                                         }
@@ -931,7 +970,7 @@
                                             },
                                             "parameters": {
                                               "entityName": "wksp_requisitions",
-                                              "recordId": "@triggerBody()?['wksp_requisitionid']",
+                                              "recordId": "@items('Apply_to_each_Requisition')?['wksp_requisitionid']",
                                               "item/wksp_status": 100000003
                                             },
                                             "authentication": "@parameters('$authentication')"
@@ -952,8 +991,8 @@
                                             },
                                             "parameters": {
                                               "emailMessage/To": "@body('Get_Requester')?['internalemailaddress']",
-                                              "emailMessage/Subject": "@concat('Requisition ', triggerBody()?['wksp_requisitionnumber'], ' approved - proceeding to procurement')",
-                                              "emailMessage/Body": "@concat('<p>Your requisition ', triggerBody()?['wksp_requisitionnumber'], ' has been approved and will now proceed to procurement.</p>')"
+                                              "emailMessage/Subject": "@concat('Requisition ', items('Apply_to_each_Requisition')?['wksp_requisitionnumber'], ' approved - proceeding to procurement')",
+                                              "emailMessage/Body": "@concat('<p>Your requisition ', items('Apply_to_each_Requisition')?['wksp_requisitionnumber'], ' has been approved and will now proceed to procurement.</p>')"
                                             },
                                             "authentication": "@parameters('$authentication')"
                                           }
@@ -1028,37 +1067,11 @@
         }
       },
       "runAfter": {
-        "Initialize_TotalValue": [
+        "List_Submitted_Requisitions": [
           "Succeeded"
         ]
       },
-      "else": {
-        "actions": {}
-      },
-      "expression": {
-        "and": [
-          {
-            "equals": [
-              "@triggerBody()?['wksp_status']",
-              100000001
-            ]
-          }
-        ]
-      },
-      "type": "If"
-    },
-    "Initialize_TotalValue": {
-      "runAfter": {},
-      "type": "InitializeVariable",
-      "inputs": {
-        "variables": [
-          {
-            "name": "TotalValue",
-            "type": "float",
-            "value": 0
-          }
-        ]
-      }
+      "type": "Foreach"
     }
   }
 }
