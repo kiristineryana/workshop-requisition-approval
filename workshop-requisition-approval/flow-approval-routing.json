@@ -1,0 +1,1064 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "$authentication": {
+      "defaultValue": {},
+      "type": "SecureObject"
+    },
+    "$connections": {
+      "defaultValue": {},
+      "type": "Object"
+    }
+  },
+  "triggers": {
+    "When_a_row_is_added_modified_or_deleted": {
+      "splitOn": "@triggerOutputs()?['body/value']",
+      "type": "OpenApiConnectionWebhook",
+      "inputs": {
+        "host": {
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+          "connectionName": "shared_commondataserviceforapps",
+          "operationId": "SubscribeWebhookTrigger"
+        },
+        "parameters": {
+          "subscriptionRequest/message": 4,
+          "subscriptionRequest/entityname": "wksp_requisition",
+          "subscriptionRequest/scope": 4,
+          "subscriptionRequest/filteringattributes": "wksp_status",
+          "subscriptionRequest/name": "afb168da-3ca1-f111-b8de-002248e81844:MTA"
+        },
+        "authentication": "@parameters('$authentication')"
+      }
+    }
+  },
+  "actions": {
+    "Is_Submitted": {
+      "actions": {
+        "List_Line_Items": {
+          "runAfter": {},
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "ListRecords"
+            },
+            "parameters": {
+              "entityName": "wksp_requisitionlineitems",
+              "$filter": "@concat('_wksp_parentrequisitionid_value eq ', triggerBody()?['wksp_requisitionid'])",
+              "$select": "wksp_linetotal"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "For_each_line_item": {
+          "foreach": "@body('List_Line_Items')?['value']",
+          "actions": {
+            "Add_Line_Total": {
+              "runAfter": {},
+              "type": "IncrementVariable",
+              "inputs": {
+                "name": "TotalValue",
+                "value": "@items('For_each_line_item')?['wksp_linetotal']"
+              }
+            }
+          },
+          "runAfter": {
+            "List_Line_Items": [
+              "Succeeded"
+            ]
+          },
+          "type": "Foreach"
+        },
+        "Get_Requester": {
+          "runAfter": {
+            "For_each_line_item": [
+              "Succeeded"
+            ]
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "GetItem"
+            },
+            "parameters": {
+              "entityName": "systemusers",
+              "recordId": "@triggerBody()?['_wksp_requesterid_value']",
+              "$select": "internalemailaddress,fullname"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Value_Tier_Under_1000": {
+          "actions": {
+            "Update_Requisition_Supervisor_Tier": {
+              "runAfter": {},
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "connectionName": "shared_commondataserviceforapps",
+                  "operationId": "UpdateOnlyRecord"
+                },
+                "parameters": {
+                  "entityName": "wksp_requisitions",
+                  "recordId": "@triggerBody()?['wksp_requisitionid']",
+                  "item/wksp_totalvalue": "@variables('TotalValue')",
+                  "item/wksp_valuetier": 100000000,
+                  "item/wksp_status": 100000002,
+                  "item/wksp_datesubmitted": "@utcNow()"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Supervisor_Stage": {
+              "actions": {
+                "Get_Supervisor_Email": {
+                  "runAfter": {},
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "ListRecords"
+                    },
+                    "parameters": {
+                      "entityName": "environmentvariablevalues",
+                      "$filter": "_environmentvariabledefinitionid_value eq bbd3ea5b-9da0-f111-b8de-002248e81844",
+                      "$select": "value",
+                      "$top": 1
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Get_Supervisor_User": {
+                  "runAfter": {
+                    "Get_Supervisor_Email": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "ListRecords"
+                    },
+                    "parameters": {
+                      "entityName": "systemusers",
+                      "$filter": "@concat('internalemailaddress eq ''', first(body('Get_Supervisor_Email')?['value'])?['value'], '''')",
+                      "$select": "systemuserid,fullname",
+                      "$top": 1
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Set_Current_Approver_Supervisor": {
+                  "runAfter": {
+                    "Get_Supervisor_User": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "UpdateOnlyRecord"
+                    },
+                    "parameters": {
+                      "entityName": "wksp_requisitions",
+                      "recordId": "@triggerBody()?['wksp_requisitionid']",
+                      "item/wksp_CurrentApproverId@odata.bind": "@concat('systemusers(', first(body('Get_Supervisor_User')?['value'])?['systemuserid'], ')')"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Start_Wait_Supervisor": {
+                  "runAfter": {
+                    "Set_Current_Approver_Supervisor": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "OpenApiConnectionWebhook",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_approvals",
+                      "connectionName": "shared_approvals",
+                      "operationId": "StartAndWaitForAnApproval"
+                    },
+                    "parameters": {
+                      "approvalType": "Basic",
+                      "WebhookApprovalCreationInput/title": "@concat('Approve requisition ', triggerBody()?['wksp_requisitionnumber'])",
+                      "WebhookApprovalCreationInput/assignedTo": "@first(body('Get_Supervisor_Email')?['value'])?['value']",
+                      "WebhookApprovalCreationInput/details": "@concat('Requested by ', body('Get_Requester')?['fullname'], '. Total value: AED ', string(variables('TotalValue')), '. Justification: ', coalesce(triggerBody()?['wksp_justification'], 'n/a'))"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Log_Approval_History_Supervisor": {
+                  "runAfter": {
+                    "Start_Wait_Supervisor": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "CreateRecord"
+                    },
+                    "parameters": {
+                      "entityName": "wksp_approvalhistories",
+                      "item/wksp_approvallevel": 100000000,
+                      "item/wksp_action": "@if(equals(body('Start_Wait_Supervisor')?['outcome'], 'Approve'), 100000000, 100000001)",
+                      "item/wksp_comment": "@coalesce(first(body('Start_Wait_Supervisor')?['responses'])?['comments'], '')",
+                      "item/wksp_decisiondate": "@utcNow()",
+                      "item/wksp_RequisitionId@odata.bind": "@concat('wksp_requisitions(', triggerBody()?['wksp_requisitionid'], ')')",
+                      "item/wksp_ApproverId@odata.bind": "@concat('systemusers(', first(body('Get_Supervisor_User')?['value'])?['systemuserid'], ')')"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Supervisor_Outcome": {
+                  "actions": {
+                    "Update_Rejected_Supervisor": {
+                      "runAfter": {},
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                          "connectionName": "shared_commondataserviceforapps",
+                          "operationId": "UpdateOnlyRecord"
+                        },
+                        "parameters": {
+                          "entityName": "wksp_requisitions",
+                          "recordId": "@triggerBody()?['wksp_requisitionid']",
+                          "item/wksp_status": 100000004
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    },
+                    "Email_Rejected_Supervisor": {
+                      "runAfter": {
+                        "Update_Rejected_Supervisor": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                          "connectionName": "shared_office365",
+                          "operationId": "SendEmailV2"
+                        },
+                        "parameters": {
+                          "emailMessage/To": "@body('Get_Requester')?['internalemailaddress']",
+                          "emailMessage/Subject": "@concat('Requisition ', triggerBody()?['wksp_requisitionnumber'], ' was rejected')",
+                          "emailMessage/Body": "@concat('<p>Your requisition ', triggerBody()?['wksp_requisitionnumber'], ' was rejected by the Workshop Supervisor.</p><p>Comment: ', coalesce(first(body('Start_Wait_Supervisor')?['responses'])?['comments'], 'No comment provided.'), '</p>')"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "Log_Approval_History_Supervisor": [
+                      "Succeeded"
+                    ]
+                  },
+                  "else": {
+                    "actions": {
+                      "Update_Approved_Supervisor": {
+                        "runAfter": {},
+                        "type": "OpenApiConnection",
+                        "inputs": {
+                          "host": {
+                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                            "connectionName": "shared_commondataserviceforapps",
+                            "operationId": "UpdateOnlyRecord"
+                          },
+                          "parameters": {
+                            "entityName": "wksp_requisitions",
+                            "recordId": "@triggerBody()?['wksp_requisitionid']",
+                            "item/wksp_status": 100000003
+                          },
+                          "authentication": "@parameters('$authentication')"
+                        }
+                      },
+                      "Email_Approved_Supervisor": {
+                        "runAfter": {
+                          "Update_Approved_Supervisor": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "OpenApiConnection",
+                        "inputs": {
+                          "host": {
+                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                            "connectionName": "shared_office365",
+                            "operationId": "SendEmailV2"
+                          },
+                          "parameters": {
+                            "emailMessage/To": "@body('Get_Requester')?['internalemailaddress']",
+                            "emailMessage/Subject": "@concat('Requisition ', triggerBody()?['wksp_requisitionnumber'], ' approved - proceeding to procurement')",
+                            "emailMessage/Body": "@concat('<p>Your requisition ', triggerBody()?['wksp_requisitionnumber'], ' has been approved and will now proceed to procurement.</p>')"
+                          },
+                          "authentication": "@parameters('$authentication')"
+                        }
+                      }
+                    }
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@body('Start_Wait_Supervisor')?['outcome']",
+                          "Reject"
+                        ]
+                      }
+                    ]
+                  },
+                  "type": "If"
+                }
+              },
+              "runAfter": {
+                "Update_Requisition_Supervisor_Tier": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Scope"
+            }
+          },
+          "runAfter": {
+            "Get_Requester": [
+              "Succeeded"
+            ]
+          },
+          "else": {
+            "actions": {
+              "Value_Tier_1000_to_10000": {
+                "actions": {
+                  "Update_Requisition_Manager_Tier": {
+                    "runAfter": {},
+                    "type": "OpenApiConnection",
+                    "inputs": {
+                      "host": {
+                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                        "connectionName": "shared_commondataserviceforapps",
+                        "operationId": "UpdateOnlyRecord"
+                      },
+                      "parameters": {
+                        "entityName": "wksp_requisitions",
+                        "recordId": "@triggerBody()?['wksp_requisitionid']",
+                        "item/wksp_totalvalue": "@variables('TotalValue')",
+                        "item/wksp_valuetier": 100000001,
+                        "item/wksp_status": 100000002,
+                        "item/wksp_datesubmitted": "@utcNow()"
+                      },
+                      "authentication": "@parameters('$authentication')"
+                    }
+                  },
+                  "Manager_Only_Stage": {
+                    "actions": {
+                      "Get_Manager_Email_A": {
+                        "runAfter": {},
+                        "type": "OpenApiConnection",
+                        "inputs": {
+                          "host": {
+                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                            "connectionName": "shared_commondataserviceforapps",
+                            "operationId": "ListRecords"
+                          },
+                          "parameters": {
+                            "entityName": "environmentvariablevalues",
+                            "$filter": "_environmentvariabledefinitionid_value eq f1ebef69-9da0-f111-b8de-002248e81844",
+                            "$select": "value",
+                            "$top": 1
+                          },
+                          "authentication": "@parameters('$authentication')"
+                        }
+                      },
+                      "Get_Manager_User_A": {
+                        "runAfter": {
+                          "Get_Manager_Email_A": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "OpenApiConnection",
+                        "inputs": {
+                          "host": {
+                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                            "connectionName": "shared_commondataserviceforapps",
+                            "operationId": "ListRecords"
+                          },
+                          "parameters": {
+                            "entityName": "systemusers",
+                            "$filter": "@concat('internalemailaddress eq ''', first(body('Get_Manager_Email_A')?['value'])?['value'], '''')",
+                            "$select": "systemuserid,fullname",
+                            "$top": 1
+                          },
+                          "authentication": "@parameters('$authentication')"
+                        }
+                      },
+                      "Set_Current_Approver_Manager_A": {
+                        "runAfter": {
+                          "Get_Manager_User_A": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "OpenApiConnection",
+                        "inputs": {
+                          "host": {
+                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                            "connectionName": "shared_commondataserviceforapps",
+                            "operationId": "UpdateOnlyRecord"
+                          },
+                          "parameters": {
+                            "entityName": "wksp_requisitions",
+                            "recordId": "@triggerBody()?['wksp_requisitionid']",
+                            "item/wksp_CurrentApproverId@odata.bind": "@concat('systemusers(', first(body('Get_Manager_User_A')?['value'])?['systemuserid'], ')')"
+                          },
+                          "authentication": "@parameters('$authentication')"
+                        }
+                      },
+                      "Start_Wait_Manager_A": {
+                        "runAfter": {
+                          "Set_Current_Approver_Manager_A": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "OpenApiConnectionWebhook",
+                        "inputs": {
+                          "host": {
+                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_approvals",
+                            "connectionName": "shared_approvals",
+                            "operationId": "StartAndWaitForAnApproval"
+                          },
+                          "parameters": {
+                            "approvalType": "Basic",
+                            "WebhookApprovalCreationInput/title": "@concat('Approve requisition ', triggerBody()?['wksp_requisitionnumber'])",
+                            "WebhookApprovalCreationInput/assignedTo": "@first(body('Get_Manager_Email_A')?['value'])?['value']",
+                            "WebhookApprovalCreationInput/details": "@concat('Requested by ', body('Get_Requester')?['fullname'], '. Total value: AED ', string(variables('TotalValue')), '. Justification: ', coalesce(triggerBody()?['wksp_justification'], 'n/a'))"
+                          },
+                          "authentication": "@parameters('$authentication')"
+                        }
+                      },
+                      "Log_Approval_History_Manager_A": {
+                        "runAfter": {
+                          "Start_Wait_Manager_A": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "OpenApiConnection",
+                        "inputs": {
+                          "host": {
+                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                            "connectionName": "shared_commondataserviceforapps",
+                            "operationId": "CreateRecord"
+                          },
+                          "parameters": {
+                            "entityName": "wksp_approvalhistories",
+                            "item/wksp_approvallevel": 100000001,
+                            "item/wksp_action": "@if(equals(body('Start_Wait_Manager_A')?['outcome'], 'Approve'), 100000000, 100000001)",
+                            "item/wksp_comment": "@coalesce(first(body('Start_Wait_Manager_A')?['responses'])?['comments'], '')",
+                            "item/wksp_decisiondate": "@utcNow()",
+                            "item/wksp_RequisitionId@odata.bind": "@concat('wksp_requisitions(', triggerBody()?['wksp_requisitionid'], ')')",
+                            "item/wksp_ApproverId@odata.bind": "@concat('systemusers(', first(body('Get_Manager_User_A')?['value'])?['systemuserid'], ')')"
+                          },
+                          "authentication": "@parameters('$authentication')"
+                        }
+                      },
+                      "Manager_A_Outcome": {
+                        "actions": {
+                          "Update_Rejected_Manager_A": {
+                            "runAfter": {},
+                            "type": "OpenApiConnection",
+                            "inputs": {
+                              "host": {
+                                "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                "connectionName": "shared_commondataserviceforapps",
+                                "operationId": "UpdateOnlyRecord"
+                              },
+                              "parameters": {
+                                "entityName": "wksp_requisitions",
+                                "recordId": "@triggerBody()?['wksp_requisitionid']",
+                                "item/wksp_status": 100000004
+                              },
+                              "authentication": "@parameters('$authentication')"
+                            }
+                          },
+                          "Email_Rejected_Manager_A": {
+                            "runAfter": {
+                              "Update_Rejected_Manager_A": [
+                                "Succeeded"
+                              ]
+                            },
+                            "type": "OpenApiConnection",
+                            "inputs": {
+                              "host": {
+                                "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                                "connectionName": "shared_office365",
+                                "operationId": "SendEmailV2"
+                              },
+                              "parameters": {
+                                "emailMessage/To": "@body('Get_Requester')?['internalemailaddress']",
+                                "emailMessage/Subject": "@concat('Requisition ', triggerBody()?['wksp_requisitionnumber'], ' was rejected')",
+                                "emailMessage/Body": "@concat('<p>Your requisition ', triggerBody()?['wksp_requisitionnumber'], ' was rejected by the Workshop Manager.</p><p>Comment: ', coalesce(first(body('Start_Wait_Manager_A')?['responses'])?['comments'], 'No comment provided.'), '</p>')"
+                              },
+                              "authentication": "@parameters('$authentication')"
+                            }
+                          }
+                        },
+                        "runAfter": {
+                          "Log_Approval_History_Manager_A": [
+                            "Succeeded"
+                          ]
+                        },
+                        "else": {
+                          "actions": {
+                            "Update_Approved_Manager_A": {
+                              "runAfter": {},
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                  "connectionName": "shared_commondataserviceforapps",
+                                  "operationId": "UpdateOnlyRecord"
+                                },
+                                "parameters": {
+                                  "entityName": "wksp_requisitions",
+                                  "recordId": "@triggerBody()?['wksp_requisitionid']",
+                                  "item/wksp_status": 100000003
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "Email_Approved_Manager_A": {
+                              "runAfter": {
+                                "Update_Approved_Manager_A": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                                  "connectionName": "shared_office365",
+                                  "operationId": "SendEmailV2"
+                                },
+                                "parameters": {
+                                  "emailMessage/To": "@body('Get_Requester')?['internalemailaddress']",
+                                  "emailMessage/Subject": "@concat('Requisition ', triggerBody()?['wksp_requisitionnumber'], ' approved - proceeding to procurement')",
+                                  "emailMessage/Body": "@concat('<p>Your requisition ', triggerBody()?['wksp_requisitionnumber'], ' has been approved and will now proceed to procurement.</p>')"
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            }
+                          }
+                        },
+                        "expression": {
+                          "and": [
+                            {
+                              "equals": [
+                                "@body('Start_Wait_Manager_A')?['outcome']",
+                                "Reject"
+                              ]
+                            }
+                          ]
+                        },
+                        "type": "If"
+                      }
+                    },
+                    "runAfter": {
+                      "Update_Requisition_Manager_Tier": [
+                        "Succeeded"
+                      ]
+                    },
+                    "type": "Scope"
+                  }
+                },
+                "runAfter": {},
+                "else": {
+                  "actions": {
+                    "Update_Requisition_High_Tier": {
+                      "runAfter": {},
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                          "connectionName": "shared_commondataserviceforapps",
+                          "operationId": "UpdateOnlyRecord"
+                        },
+                        "parameters": {
+                          "entityName": "wksp_requisitions",
+                          "recordId": "@triggerBody()?['wksp_requisitionid']",
+                          "item/wksp_totalvalue": "@variables('TotalValue')",
+                          "item/wksp_valuetier": 100000002,
+                          "item/wksp_status": 100000002,
+                          "item/wksp_datesubmitted": "@utcNow()"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    },
+                    "Manager_Stage": {
+                      "actions": {
+                        "Get_Manager_Email_B": {
+                          "runAfter": {},
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "host": {
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                              "connectionName": "shared_commondataserviceforapps",
+                              "operationId": "ListRecords"
+                            },
+                            "parameters": {
+                              "entityName": "environmentvariablevalues",
+                              "$filter": "_environmentvariabledefinitionid_value eq f1ebef69-9da0-f111-b8de-002248e81844",
+                              "$select": "value",
+                              "$top": 1
+                            },
+                            "authentication": "@parameters('$authentication')"
+                          }
+                        },
+                        "Get_Manager_User_B": {
+                          "runAfter": {
+                            "Get_Manager_Email_B": [
+                              "Succeeded"
+                            ]
+                          },
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "host": {
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                              "connectionName": "shared_commondataserviceforapps",
+                              "operationId": "ListRecords"
+                            },
+                            "parameters": {
+                              "entityName": "systemusers",
+                              "$filter": "@concat('internalemailaddress eq ''', first(body('Get_Manager_Email_B')?['value'])?['value'], '''')",
+                              "$select": "systemuserid,fullname",
+                              "$top": 1
+                            },
+                            "authentication": "@parameters('$authentication')"
+                          }
+                        },
+                        "Set_Current_Approver_Manager_B": {
+                          "runAfter": {
+                            "Get_Manager_User_B": [
+                              "Succeeded"
+                            ]
+                          },
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "host": {
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                              "connectionName": "shared_commondataserviceforapps",
+                              "operationId": "UpdateOnlyRecord"
+                            },
+                            "parameters": {
+                              "entityName": "wksp_requisitions",
+                              "recordId": "@triggerBody()?['wksp_requisitionid']",
+                              "item/wksp_CurrentApproverId@odata.bind": "@concat('systemusers(', first(body('Get_Manager_User_B')?['value'])?['systemuserid'], ')')"
+                            },
+                            "authentication": "@parameters('$authentication')"
+                          }
+                        },
+                        "Start_Wait_Manager_B": {
+                          "runAfter": {
+                            "Set_Current_Approver_Manager_B": [
+                              "Succeeded"
+                            ]
+                          },
+                          "type": "OpenApiConnectionWebhook",
+                          "inputs": {
+                            "host": {
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_approvals",
+                              "connectionName": "shared_approvals",
+                              "operationId": "StartAndWaitForAnApproval"
+                            },
+                            "parameters": {
+                              "approvalType": "Basic",
+                              "WebhookApprovalCreationInput/title": "@concat('Approve requisition ', triggerBody()?['wksp_requisitionnumber'], ' (stage 1 of 2)')",
+                              "WebhookApprovalCreationInput/assignedTo": "@first(body('Get_Manager_Email_B')?['value'])?['value']",
+                              "WebhookApprovalCreationInput/details": "@concat('Requested by ', body('Get_Requester')?['fullname'], '. Total value: AED ', string(variables('TotalValue')), '. Justification: ', coalesce(triggerBody()?['wksp_justification'], 'n/a'), '. This request also needs Finance Controller approval after yours.')"
+                            },
+                            "authentication": "@parameters('$authentication')"
+                          }
+                        },
+                        "Log_Approval_History_Manager_B": {
+                          "runAfter": {
+                            "Start_Wait_Manager_B": [
+                              "Succeeded"
+                            ]
+                          },
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "host": {
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                              "connectionName": "shared_commondataserviceforapps",
+                              "operationId": "CreateRecord"
+                            },
+                            "parameters": {
+                              "entityName": "wksp_approvalhistories",
+                              "item/wksp_approvallevel": 100000001,
+                              "item/wksp_action": "@if(equals(body('Start_Wait_Manager_B')?['outcome'], 'Approve'), 100000000, 100000001)",
+                              "item/wksp_comment": "@coalesce(first(body('Start_Wait_Manager_B')?['responses'])?['comments'], '')",
+                              "item/wksp_decisiondate": "@utcNow()",
+                              "item/wksp_RequisitionId@odata.bind": "@concat('wksp_requisitions(', triggerBody()?['wksp_requisitionid'], ')')",
+                              "item/wksp_ApproverId@odata.bind": "@concat('systemusers(', first(body('Get_Manager_User_B')?['value'])?['systemuserid'], ')')"
+                            },
+                            "authentication": "@parameters('$authentication')"
+                          }
+                        },
+                        "Manager_B_Outcome": {
+                          "actions": {
+                            "Update_Rejected_Manager_B": {
+                              "runAfter": {},
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                  "connectionName": "shared_commondataserviceforapps",
+                                  "operationId": "UpdateOnlyRecord"
+                                },
+                                "parameters": {
+                                  "entityName": "wksp_requisitions",
+                                  "recordId": "@triggerBody()?['wksp_requisitionid']",
+                                  "item/wksp_status": 100000004
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "Email_Rejected_Manager_B": {
+                              "runAfter": {
+                                "Update_Rejected_Manager_B": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                                  "connectionName": "shared_office365",
+                                  "operationId": "SendEmailV2"
+                                },
+                                "parameters": {
+                                  "emailMessage/To": "@body('Get_Requester')?['internalemailaddress']",
+                                  "emailMessage/Subject": "@concat('Requisition ', triggerBody()?['wksp_requisitionnumber'], ' was rejected')",
+                                  "emailMessage/Body": "@concat('<p>Your requisition ', triggerBody()?['wksp_requisitionnumber'], ' was rejected by the Workshop Manager.</p><p>Comment: ', coalesce(first(body('Start_Wait_Manager_B')?['responses'])?['comments'], 'No comment provided.'), '</p>')"
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            }
+                          },
+                          "runAfter": {
+                            "Log_Approval_History_Manager_B": [
+                              "Succeeded"
+                            ]
+                          },
+                          "else": {
+                            "actions": {
+                              "Finance_Stage": {
+                                "actions": {
+                                  "Get_Finance_Email": {
+                                    "runAfter": {},
+                                    "type": "OpenApiConnection",
+                                    "inputs": {
+                                      "host": {
+                                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                        "connectionName": "shared_commondataserviceforapps",
+                                        "operationId": "ListRecords"
+                                      },
+                                      "parameters": {
+                                        "entityName": "environmentvariablevalues",
+                                        "$filter": "_environmentvariabledefinitionid_value eq f5ebef69-9da0-f111-b8de-002248e81844",
+                                        "$select": "value",
+                                        "$top": 1
+                                      },
+                                      "authentication": "@parameters('$authentication')"
+                                    }
+                                  },
+                                  "Get_Finance_User": {
+                                    "runAfter": {
+                                      "Get_Finance_Email": [
+                                        "Succeeded"
+                                      ]
+                                    },
+                                    "type": "OpenApiConnection",
+                                    "inputs": {
+                                      "host": {
+                                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                        "connectionName": "shared_commondataserviceforapps",
+                                        "operationId": "ListRecords"
+                                      },
+                                      "parameters": {
+                                        "entityName": "systemusers",
+                                        "$filter": "@concat('internalemailaddress eq ''', first(body('Get_Finance_Email')?['value'])?['value'], '''')",
+                                        "$select": "systemuserid,fullname",
+                                        "$top": 1
+                                      },
+                                      "authentication": "@parameters('$authentication')"
+                                    }
+                                  },
+                                  "Set_Current_Approver_Finance": {
+                                    "runAfter": {
+                                      "Get_Finance_User": [
+                                        "Succeeded"
+                                      ]
+                                    },
+                                    "type": "OpenApiConnection",
+                                    "inputs": {
+                                      "host": {
+                                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                        "connectionName": "shared_commondataserviceforapps",
+                                        "operationId": "UpdateOnlyRecord"
+                                      },
+                                      "parameters": {
+                                        "entityName": "wksp_requisitions",
+                                        "recordId": "@triggerBody()?['wksp_requisitionid']",
+                                        "item/wksp_CurrentApproverId@odata.bind": "@concat('systemusers(', first(body('Get_Finance_User')?['value'])?['systemuserid'], ')')"
+                                      },
+                                      "authentication": "@parameters('$authentication')"
+                                    }
+                                  },
+                                  "Start_Wait_Finance": {
+                                    "runAfter": {
+                                      "Set_Current_Approver_Finance": [
+                                        "Succeeded"
+                                      ]
+                                    },
+                                    "type": "OpenApiConnectionWebhook",
+                                    "inputs": {
+                                      "host": {
+                                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_approvals",
+                                        "connectionName": "shared_approvals",
+                                        "operationId": "StartAndWaitForAnApproval"
+                                      },
+                                      "parameters": {
+                                        "approvalType": "Basic",
+                                        "WebhookApprovalCreationInput/title": "@concat('Approve requisition ', triggerBody()?['wksp_requisitionnumber'], ' (stage 2 of 2)')",
+                                        "WebhookApprovalCreationInput/assignedTo": "@first(body('Get_Finance_Email')?['value'])?['value']",
+                                        "WebhookApprovalCreationInput/details": "@concat('Requested by ', body('Get_Requester')?['fullname'], '. Total value: AED ', string(variables('TotalValue')), '. Justification: ', coalesce(triggerBody()?['wksp_justification'], 'n/a'), '. Already approved by the Workshop Manager.')"
+                                      },
+                                      "authentication": "@parameters('$authentication')"
+                                    }
+                                  },
+                                  "Log_Approval_History_Finance": {
+                                    "runAfter": {
+                                      "Start_Wait_Finance": [
+                                        "Succeeded"
+                                      ]
+                                    },
+                                    "type": "OpenApiConnection",
+                                    "inputs": {
+                                      "host": {
+                                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                        "connectionName": "shared_commondataserviceforapps",
+                                        "operationId": "CreateRecord"
+                                      },
+                                      "parameters": {
+                                        "entityName": "wksp_approvalhistories",
+                                        "item/wksp_approvallevel": 100000002,
+                                        "item/wksp_action": "@if(equals(body('Start_Wait_Finance')?['outcome'], 'Approve'), 100000000, 100000001)",
+                                        "item/wksp_comment": "@coalesce(first(body('Start_Wait_Finance')?['responses'])?['comments'], '')",
+                                        "item/wksp_decisiondate": "@utcNow()",
+                                        "item/wksp_RequisitionId@odata.bind": "@concat('wksp_requisitions(', triggerBody()?['wksp_requisitionid'], ')')",
+                                        "item/wksp_ApproverId@odata.bind": "@concat('systemusers(', first(body('Get_Finance_User')?['value'])?['systemuserid'], ')')"
+                                      },
+                                      "authentication": "@parameters('$authentication')"
+                                    }
+                                  },
+                                  "Finance_Outcome": {
+                                    "actions": {
+                                      "Update_Rejected_Finance": {
+                                        "runAfter": {},
+                                        "type": "OpenApiConnection",
+                                        "inputs": {
+                                          "host": {
+                                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                            "connectionName": "shared_commondataserviceforapps",
+                                            "operationId": "UpdateOnlyRecord"
+                                          },
+                                          "parameters": {
+                                            "entityName": "wksp_requisitions",
+                                            "recordId": "@triggerBody()?['wksp_requisitionid']",
+                                            "item/wksp_status": 100000004
+                                          },
+                                          "authentication": "@parameters('$authentication')"
+                                        }
+                                      },
+                                      "Email_Rejected_Finance": {
+                                        "runAfter": {
+                                          "Update_Rejected_Finance": [
+                                            "Succeeded"
+                                          ]
+                                        },
+                                        "type": "OpenApiConnection",
+                                        "inputs": {
+                                          "host": {
+                                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                                            "connectionName": "shared_office365",
+                                            "operationId": "SendEmailV2"
+                                          },
+                                          "parameters": {
+                                            "emailMessage/To": "@body('Get_Requester')?['internalemailaddress']",
+                                            "emailMessage/Subject": "@concat('Requisition ', triggerBody()?['wksp_requisitionnumber'], ' was rejected')",
+                                            "emailMessage/Body": "@concat('<p>Your requisition ', triggerBody()?['wksp_requisitionnumber'], ' was rejected by the Finance Controller.</p><p>Comment: ', coalesce(first(body('Start_Wait_Finance')?['responses'])?['comments'], 'No comment provided.'), '</p>')"
+                                          },
+                                          "authentication": "@parameters('$authentication')"
+                                        }
+                                      }
+                                    },
+                                    "runAfter": {
+                                      "Log_Approval_History_Finance": [
+                                        "Succeeded"
+                                      ]
+                                    },
+                                    "else": {
+                                      "actions": {
+                                        "Update_Approved_Finance": {
+                                          "runAfter": {},
+                                          "type": "OpenApiConnection",
+                                          "inputs": {
+                                            "host": {
+                                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                              "connectionName": "shared_commondataserviceforapps",
+                                              "operationId": "UpdateOnlyRecord"
+                                            },
+                                            "parameters": {
+                                              "entityName": "wksp_requisitions",
+                                              "recordId": "@triggerBody()?['wksp_requisitionid']",
+                                              "item/wksp_status": 100000003
+                                            },
+                                            "authentication": "@parameters('$authentication')"
+                                          }
+                                        },
+                                        "Email_Approved_Finance": {
+                                          "runAfter": {
+                                            "Update_Approved_Finance": [
+                                              "Succeeded"
+                                            ]
+                                          },
+                                          "type": "OpenApiConnection",
+                                          "inputs": {
+                                            "host": {
+                                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                                              "connectionName": "shared_office365",
+                                              "operationId": "SendEmailV2"
+                                            },
+                                            "parameters": {
+                                              "emailMessage/To": "@body('Get_Requester')?['internalemailaddress']",
+                                              "emailMessage/Subject": "@concat('Requisition ', triggerBody()?['wksp_requisitionnumber'], ' approved - proceeding to procurement')",
+                                              "emailMessage/Body": "@concat('<p>Your requisition ', triggerBody()?['wksp_requisitionnumber'], ' has been approved and will now proceed to procurement.</p>')"
+                                            },
+                                            "authentication": "@parameters('$authentication')"
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "expression": {
+                                      "and": [
+                                        {
+                                          "equals": [
+                                            "@body('Start_Wait_Finance')?['outcome']",
+                                            "Reject"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "type": "If"
+                                  }
+                                },
+                                "runAfter": {},
+                                "type": "Scope"
+                              }
+                            }
+                          },
+                          "expression": {
+                            "and": [
+                              {
+                                "equals": [
+                                  "@body('Start_Wait_Manager_B')?['outcome']",
+                                  "Reject"
+                                ]
+                              }
+                            ]
+                          },
+                          "type": "If"
+                        }
+                      },
+                      "runAfter": {
+                        "Update_Requisition_High_Tier": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "Scope"
+                    }
+                  }
+                },
+                "expression": {
+                  "and": [
+                    {
+                      "less": [
+                        "@variables('TotalValue')",
+                        10000
+                      ]
+                    }
+                  ]
+                },
+                "type": "If"
+              }
+            }
+          },
+          "expression": {
+            "and": [
+              {
+                "less": [
+                  "@variables('TotalValue')",
+                  1000
+                ]
+              }
+            ]
+          },
+          "type": "If"
+        }
+      },
+      "runAfter": {
+        "Initialize_TotalValue": [
+          "Succeeded"
+        ]
+      },
+      "else": {
+        "actions": {}
+      },
+      "expression": {
+        "and": [
+          {
+            "equals": [
+              "@triggerBody()?['wksp_status']",
+              100000001
+            ]
+          }
+        ]
+      },
+      "type": "If"
+    },
+    "Initialize_TotalValue": {
+      "runAfter": {},
+      "type": "InitializeVariable",
+      "inputs": {
+        "variables": [
+          {
+            "name": "TotalValue",
+            "type": "float",
+            "value": 0
+          }
+        ]
+      }
+    }
+  }
+}
