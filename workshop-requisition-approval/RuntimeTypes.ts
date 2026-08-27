@@ -1,8 +1,11 @@
 ﻿// ---------------- Type Definitions which can be imported from ./RuntimeTypes -------------------------
 export interface TableRegistrations extends BaseTableRegistrations {
+    "wksp_costcentre": wksp_costcentre,
     "wksp_requisition": wksp_requisition,
 }
 export interface EnumRegistrations extends BaseEnumRegistrations {
+    "wksp_costcentre-statecode": wksp_costcentre_statecode,
+    "wksp_costcentre-statuscode": wksp_costcentre_statuscode,
     "wksp_requisition-statecode": wksp_requisition_statecode,
     "wksp_requisition-statuscode": wksp_requisition_statuscode,
     "wksp_requisition-wksp_paymentterms": wksp_requisition_wksp_paymentterms,
@@ -13,6 +16,31 @@ export interface EnumRegistrations extends BaseEnumRegistrations {
     "wksp_requisition-wksp_valuetier": wksp_requisition_wksp_valuetier,
     "wksp_requisition-wksp_vehicleoffroad": wksp_requisition_wksp_vehicleoffroad,
 }
+export type wksp_costcentre = TableRow<{
+    // Primary Key Column
+    readonly wksp_costcentreid: string,
+    readonly createdbyname: string,
+    readonly createdbyyominame: string,
+    readonly createdonbehalfbyname: string,
+    readonly createdonbehalfbyyominame: string,
+    readonly exchangerate: number,
+    readonly modifiedbyname: string,
+    readonly modifiedbyyominame: string,
+    readonly modifiedonbehalfbyname: string,
+    readonly modifiedonbehalfbyyominame: string,
+    readonly owningbusinessunitname: string,
+    statecode: wksp_costcentre_statecode,
+    statuscode: wksp_costcentre_statuscode,
+    // Foreign Key Column
+    readonly _transactioncurrencyid_value: `/transactioncurrency(${string})`,
+    readonly transactioncurrencyidname: string,
+    wksp_committedamount: number,
+    readonly wksp_committedamount_base: number,
+    wksp_monthlybudget: number,
+    readonly wksp_monthlybudget_base: number,
+    wksp_name: string,
+}>
+
 export type wksp_requisition = TableRow<{
     // Primary Key Column
     readonly wksp_requisitionid: string,
@@ -26,15 +54,18 @@ export type wksp_requisition = TableRow<{
     readonly modifiedonbehalfbyname: string,
     readonly modifiedonbehalfbyyominame: string,
     readonly owningbusinessunitname: string,
+    processid: string,
+    stageid: string,
     statecode: wksp_requisition_statecode,
     statuscode: wksp_requisition_statuscode,
     // Foreign Key Column
     readonly _transactioncurrencyid_value: `/transactioncurrency(${string})`,
     readonly transactioncurrencyidname: string,
+    traversedpath: string,
     wksp_ageinapprovalhours: number,
     wksp_branchworkshop: string,
     // Foreign Key Column
-    readonly _wksp_costcentreid_value: `/wksp_costcentre(${string})`,
+    _wksp_costcentreid_value: `/wksp_costcentre(${string})`,
     readonly wksp_costcentreidname: string,
     // Foreign Key Column
     readonly _wksp_currentapproverid_value: `/systemuser(${string})`,
@@ -72,6 +103,14 @@ export type wksp_requisition = TableRow<{
     wksp_vehicleoffroad: wksp_requisition_wksp_vehicleoffroad,
 }>
 
+const enum wksp_costcentre_statecode {
+"Active" = 0,
+"Inactive" = 1,
+}
+const enum wksp_costcentre_statuscode {
+"Active" = 1,
+"Inactive" = 2,
+}
 const enum wksp_requisition_statecode {
 "Active" = 0,
 "Inactive" = 1,

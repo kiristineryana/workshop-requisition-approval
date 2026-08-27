@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useEffect, useMemo, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import type {
     TableRow,
@@ -37,6 +37,9 @@ import {
     DataBarVerticalRegular,
     ChartMultipleRegular,
     ArrowTrendingRegular,
+    ShieldErrorRegular,
+    ShieldTaskRegular,
+    WalletRegular,
 } from '@fluentui/react-icons';
 
 // ---------------------------------------------------------------------------
@@ -54,6 +57,8 @@ type RequisitionRow = TableRow<{
     wksp_valuetier: number;
     wksp_totalvalue: number;
     wksp_datesubmitted: Date;
+    wksp_riskscore: number;
+    wksp_risklevel: number;
     readonly _wksp_requesterid_value: `/systemuser(${string})`;
     readonly _wksp_currentapproverid_value: `/systemuser(${string})`;
 }>;
@@ -70,36 +75,77 @@ type RequisitionRecord = {
     dateSubmitted: Date | null;
     requesterName: string;
     approverName: string;
+    riskScore: number;
+    riskLevel: number;
+};
+
+// Raw row shape for the Cost Centre budget-vs-committed section.
+type CostCentreRow = TableRow<{
+    readonly wksp_costcentreid: string;
+    wksp_name: string;
+    wksp_monthlybudget: number;
+    wksp_committedamount: number;
+}>;
+
+type ReadableCostCentre = ReadableTableRow<CostCentreRow>;
+
+type CostCentreRecord = {
+    id: string;
+    name: string;
+    monthlyBudget: number;
+    committedAmount: number;
 };
 
 // ---------- Enum metadata (verified against RuntimeTypes.ts) ----------
 
 type BadgeColor = 'subtle' | 'informative' | 'warning' | 'success' | 'danger' | 'brand';
 
+// ---------- Brand palette (wireframe 1c — explicit hex, not tokens.colorPalette*) ----------
+
+const BRAND_NAVY = '#181059';
+const BRAND_RED = '#D42A41';
+const GOLD = '#F5B128';
+const GREEN = '#34C759';
+const PERIWINKLE = '#7A81BE';
+const SUBMITTED_BLUE = '#5B63A8';
+const GREY_BLUE = '#B9BCD0';
+const SURFACE_MUTED = '#F3F4F6';
+
 const STATUS_META: { value: number; label: string; badgeColor: BadgeColor; chartColor: string }[] = [
-    { value: 100000000, label: 'Draft', badgeColor: 'subtle', chartColor: tokens.colorNeutralForeground3 },
-    { value: 100000001, label: 'Submitted', badgeColor: 'informative', chartColor: tokens.colorPaletteBlueForeground2 },
-    { value: 100000002, label: 'In Approval', badgeColor: 'warning', chartColor: tokens.colorPaletteMarigoldForeground2 },
-    { value: 100000003, label: 'Approved', badgeColor: 'success', chartColor: tokens.colorPaletteGreenForeground2 },
-    { value: 100000004, label: 'Rejected', badgeColor: 'danger', chartColor: tokens.colorPaletteRedForeground2 },
-    { value: 100000005, label: 'Ordered', badgeColor: 'brand', chartColor: tokens.colorPalettePurpleForeground2 },
-    { value: 100000006, label: 'Received', badgeColor: 'success', chartColor: tokens.colorPaletteTealForeground2 },
+    { value: 100000000, label: 'Draft', badgeColor: 'subtle', chartColor: GREY_BLUE },
+    { value: 100000001, label: 'Submitted', badgeColor: 'informative', chartColor: SUBMITTED_BLUE },
+    { value: 100000002, label: 'In Approval', badgeColor: 'warning', chartColor: GOLD },
+    { value: 100000003, label: 'Approved', badgeColor: 'success', chartColor: BRAND_NAVY },
+    { value: 100000004, label: 'Rejected', badgeColor: 'danger', chartColor: BRAND_RED },
+    { value: 100000005, label: 'Ordered', badgeColor: 'brand', chartColor: PERIWINKLE },
+    { value: 100000006, label: 'Received', badgeColor: 'success', chartColor: GREEN },
 ];
 
-const VALUETIER_META: { value: number; label: string; chartColor: string }[] = [
-    { value: 100000000, label: 'Under 1,000 AED', chartColor: tokens.colorPaletteTealForeground2 },
-    { value: 100000001, label: '1,000-10,000 AED', chartColor: tokens.colorPaletteBlueForeground2 },
-    { value: 100000002, label: 'Above 10,000 AED', chartColor: tokens.colorPalettePurpleForeground2 },
+const VALUETIER_META: { value: number; label: string; chartColor: string; approver: string }[] = [
+    { value: 100000000, label: 'Under 1,000 AED', chartColor: GREY_BLUE, approver: 'Supervisor' },
+    { value: 100000001, label: '1,000-10,000 AED', chartColor: BRAND_NAVY, approver: 'Manager' },
+    { value: 100000002, label: 'Above 10,000 AED', chartColor: BRAND_RED, approver: 'Mgr → Finance' },
+];
+
+const RISK_LEVEL_META: { value: number; label: string; chartColor: string }[] = [
+    { value: 100000000, label: 'Low', chartColor: GREEN },
+    { value: 100000001, label: 'Medium', chartColor: GOLD },
+    { value: 100000002, label: 'High', chartColor: BRAND_RED },
 ];
 
 const PENDING_STATUS_VALUES = [100000001, 100000002]; // Submitted, In Approval
+const CLOSED_STATUS_VALUES = [100000004, 100000006]; // Rejected, Received — excluded from "open"
 
 function getStatusMeta(value: number) {
     return STATUS_META.find((m) => m.value === value) ?? { value, label: 'Unknown', badgeColor: 'subtle' as BadgeColor, chartColor: tokens.colorNeutralForeground3 };
 }
 
 function getValueTierMeta(value: number) {
-    return VALUETIER_META.find((m) => m.value === value) ?? { value, label: 'Unknown', chartColor: tokens.colorNeutralForeground3 };
+    return VALUETIER_META.find((m) => m.value === value) ?? { value, label: 'Unknown', chartColor: tokens.colorNeutralForeground3, approver: '—' };
+}
+
+function getRiskLevelMeta(value: number) {
+    return RISK_LEVEL_META.find((m) => m.value === value) ?? { value, label: 'Unknown', chartColor: tokens.colorNeutralForeground3 };
 }
 
 // ---------- Helpers ----------
@@ -138,6 +184,8 @@ function formatDate(value: Date | null): string {
 
 const CACHE_KEY = '__ppRequisitionAnalytics_requisitionCache';
 const INFLIGHT_KEY = '__ppRequisitionAnalytics_requisitionInflight';
+const COSTCENTRE_CACHE_KEY = '__ppRequisitionAnalytics_costCentreCache';
+const COSTCENTRE_INFLIGHT_KEY = '__ppRequisitionAnalytics_costCentreInflight';
 const winAny = window as unknown as Record<string, unknown>;
 
 // ---------- Styles ----------
@@ -180,7 +228,7 @@ const useStyles = makeStyles({
     },
     kpiGrid: {
         display: 'grid',
-        gridTemplateColumns: 'repeat(5, 1fr)',
+        gridTemplateColumns: 'repeat(6, 1fr)',
         gap: tokens.spacingHorizontalM,
         '@media (max-width: 1024px)': { gridTemplateColumns: 'repeat(3, 1fr)' },
         '@media (max-width: 640px)': { gridTemplateColumns: 'repeat(2, 1fr)' },
@@ -190,10 +238,14 @@ const useStyles = makeStyles({
         alignItems: 'center',
         gap: tokens.spacingHorizontalM,
         padding: tokens.spacingHorizontalM,
-        backgroundColor: tokens.colorNeutralBackground1,
+        backgroundColor: SURFACE_MUTED,
         border: `${tokens.strokeWidthThin} solid ${tokens.colorNeutralStroke2}`,
         borderRadius: tokens.borderRadiusLarge,
         minWidth: 0,
+    },
+    kpiCardDanger: {
+        backgroundColor: '#FFF4F5',
+        border: `${tokens.strokeWidthThin} solid ${BRAND_RED}`,
     },
     kpiIconWrap: {
         display: 'flex',
@@ -215,14 +267,22 @@ const useStyles = makeStyles({
         fontWeight: tokens.fontWeightSemibold,
         fontFamily: tokens.fontFamilyBase,
         fontVariantNumeric: 'tabular-nums',
-        color: tokens.colorNeutralForeground1,
+        color: BRAND_NAVY,
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
     },
+    kpiValueDanger: {
+        color: BRAND_RED,
+    },
     kpiLabel: {
         fontSize: tokens.fontSizeBase200,
         color: tokens.colorNeutralForeground3,
+        textTransform: 'uppercase',
+        letterSpacing: '0.04em',
+    },
+    kpiLabelDanger: {
+        color: BRAND_RED,
     },
     chartsRow: {
         display: 'flex',
@@ -257,18 +317,6 @@ const useStyles = makeStyles({
         gap: tokens.spacingHorizontalS,
         color: tokens.colorNeutralForeground1,
     },
-    tierBody: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: tokens.spacingHorizontalL,
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-        width: '100%',
-    },
-    tierChartWrap: {
-        maxWidth: '200px',
-        flex: '0 0 auto',
-    },
     legend: {
         display: 'flex',
         flexDirection: 'column',
@@ -286,6 +334,36 @@ const useStyles = makeStyles({
         height: '10px',
         borderRadius: tokens.borderRadiusCircular,
         flexShrink: 0,
+    },
+    riskMixBar: {
+        display: 'flex',
+        width: '100%',
+        height: '18px',
+        borderRadius: '999px',
+        overflow: 'hidden',
+        backgroundColor: SURFACE_MUTED,
+    },
+    costCentreList: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: tokens.spacingVerticalM,
+    },
+    costCentreRow: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: tokens.spacingVerticalXS,
+    },
+    costCentreTrack: {
+        width: '100%',
+        height: '10px',
+        borderRadius: tokens.borderRadiusMedium,
+        backgroundColor: SURFACE_MUTED,
+        overflow: 'hidden',
+    },
+    costCentreFill: {
+        height: '100%',
+        borderRadius: tokens.borderRadiusMedium,
+        transition: 'width 0.4s ease',
     },
     sectionHeader: {
         display: 'flex',
@@ -310,6 +388,29 @@ const useStyles = makeStyles({
         display: 'flex',
         flexDirection: 'column',
         gap: tokens.spacingVerticalS,
+    },
+    tableCard: {
+        border: `${tokens.strokeWidthThin} solid ${tokens.colorNeutralStroke2}`,
+        borderRadius: tokens.borderRadiusLarge,
+        overflow: 'hidden',
+        backgroundColor: tokens.colorNeutralBackground1,
+    },
+    tableHeaderRow: {
+        backgroundColor: SURFACE_MUTED,
+        textTransform: 'uppercase',
+        fontSize: tokens.fontSizeBase200,
+        letterSpacing: '0.03em',
+    },
+    riskPill: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minWidth: '32px',
+        padding: `2px ${tokens.spacingHorizontalS}`,
+        borderRadius: '999px',
+        fontSize: tokens.fontSizeBase200,
+        fontWeight: tokens.fontWeightSemibold,
+        color: '#FFFFFF',
     },
     emptyState: {
         display: 'flex',
@@ -343,18 +444,18 @@ const useStyles = makeStyles({
 
 // ---------- KPI card ----------
 
-function KpiCard(props: { icon: JSX.Element; label: string; value: string; accentBg: string }) {
+function KpiCard(props: { icon: JSX.Element; label: string; value: string; accentBg: string; danger?: boolean }) {
     const styles = useStyles();
     return (
-        <div className={styles.kpiCard}>
+        <div className={props.danger ? `${styles.kpiCard} ${styles.kpiCardDanger}` : styles.kpiCard}>
             <div className={styles.kpiIconWrap} style={{ backgroundColor: props.accentBg }}>
                 {props.icon}
             </div>
             <div className={styles.kpiTextGroup}>
-                <Text className={styles.kpiValue} title={props.value}>
+                <Text className={props.danger ? `${styles.kpiValue} ${styles.kpiValueDanger}` : styles.kpiValue} title={props.value}>
                     {props.value}
                 </Text>
-                <Text className={styles.kpiLabel}>{props.label}</Text>
+                <Text className={props.danger ? `${styles.kpiLabel} ${styles.kpiLabelDanger}` : styles.kpiLabel}>{props.label}</Text>
             </div>
         </div>
     );
@@ -420,7 +521,7 @@ function StatusBarChart(props: { data: { label: string; count: number; color: st
             .attr('width', innerWidth)
             .attr('height', STATUS_BAR_HEIGHT)
             .attr('rx', 4)
-            .attr('fill', tokens.colorNeutralBackground4);
+            .attr('fill', SURFACE_MUTED);
 
         const bars = rows
             .append('rect')
@@ -463,91 +564,101 @@ function StatusBarChart(props: { data: { label: string; count: number; color: st
     );
 }
 
-// ---------- Value tier donut chart (D3) ----------
+// ---------- Spend-by-tier bar chart (D3) — wireframe 1c's 3-bar layout ----------
 
-const DONUT_SIZE = 180;
-const DONUT_THICKNESS = 28;
-const TIER_ANIM_KEY = '__ppReqAnalyticsTierChartAnimated';
+const TIER_BAR_WIDTH = 280;
+const TIER_BAR_HEIGHT = 220;
+const TIER_BAR_ANIM_KEY = '__ppReqAnalyticsTierBarChartAnimated';
 
-type TierDatum = { label: string; count: number; color: string };
+type TierBarDatum = { label: string; value: number; color: string; approver: string };
 
-function ValueTierDonutChart(props: { data: TierDatum[]; total: number }) {
+function SpendByTierChart(props: { data: TierBarDatum[] }) {
     const svgRef = useRef<SVGSVGElement>(null);
-    const { data, total } = props;
+    const { data } = props;
 
     useEffect(() => {
         if (!svgRef.current) return;
         const svg = d3.select(svgRef.current);
         const w = window as unknown as Record<string, boolean>;
 
-        if (w[TIER_ANIM_KEY] && svg.selectAll('path.arc').size() > 0) return;
-        const shouldAnimate = !w[TIER_ANIM_KEY];
-        w[TIER_ANIM_KEY] = true;
+        if (w[TIER_BAR_ANIM_KEY] && svg.selectAll('rect.tier-bar').size() > 0) return;
+        const shouldAnimate = !w[TIER_BAR_ANIM_KEY];
+        w[TIER_BAR_ANIM_KEY] = true;
 
         svg.selectAll('*').remove();
-        svg.attr('viewBox', `0 0 ${DONUT_SIZE} ${DONUT_SIZE}`);
 
-        const radius = DONUT_SIZE / 2;
-        const g = svg.append('g').attr('transform', `translate(${radius},${radius})`);
+        const margin = { top: 28, right: 12, bottom: 34, left: 12 };
+        const innerWidth = TIER_BAR_WIDTH - margin.left - margin.right;
+        const innerHeight = TIER_BAR_HEIGHT - margin.top - margin.bottom;
 
-        const hasData = total > 0;
-        const pieData: TierDatum[] = hasData ? data : [{ label: 'No data', count: 1, color: tokens.colorNeutralBackground4 }];
+        svg.attr('viewBox', `0 0 ${TIER_BAR_WIDTH} ${TIER_BAR_HEIGHT}`);
+        const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
 
-        const pie = d3.pie<TierDatum>().value((d) => d.count).sort(null);
-        const arcGen = d3
-            .arc<d3.PieArcDatum<TierDatum>>()
-            .innerRadius(radius - DONUT_THICKNESS)
-            .outerRadius(radius - 4);
+        const x = d3
+            .scaleBand<string>()
+            .domain(data.map((d) => d.label))
+            .range([0, innerWidth])
+            .padding(0.35);
+        const maxValue = Math.max(1, d3.max(data, (d) => d.value) ?? 1);
+        const y = d3.scaleLinear().domain([0, maxValue]).range([innerHeight, 0]).nice();
 
-        const arcs = g
-            .selectAll('path.arc')
-            .data(pie(pieData))
+        const bars = g
+            .selectAll('rect.tier-bar')
+            .data(data)
             .enter()
-            .append('path')
-            .attr('class', 'arc')
-            .attr('fill', (d) => d.data.color);
+            .append('rect')
+            .attr('class', 'tier-bar')
+            .attr('x', (d) => x(d.label) ?? 0)
+            .attr('width', x.bandwidth())
+            .attr('rx', 3)
+            .attr('fill', (d) => d.color);
 
         if (shouldAnimate) {
-            arcs.each(function (d) {
-                const el = d3.select(this);
-                el.transition()
-                    .duration(600)
-                    .attrTween('d', () => {
-                        const interpolateAngle = d3.interpolate(d.startAngle, d.startAngle);
-                        return (t: number) => {
-                            const interpolated = { ...d, endAngle: d.startAngle + (d.endAngle - d.startAngle) * t, startAngle: interpolateAngle(t) };
-                            return arcGen(interpolated) ?? '';
-                        };
-                    });
-            });
+            bars
+                .attr('y', innerHeight)
+                .attr('height', 0)
+                .transition()
+                .duration(600)
+                .attr('y', (d) => y(d.value))
+                .attr('height', (d) => innerHeight - y(d.value));
         } else {
-            arcs.attr('d', (d) => arcGen(d) ?? '');
+            bars.attr('y', (d) => y(d.value)).attr('height', (d) => innerHeight - y(d.value));
         }
 
-        g.append('text')
+        g.selectAll('text.tier-value')
+            .data(data)
+            .enter()
+            .append('text')
+            .attr('class', 'tier-value')
+            .attr('x', (d) => (x(d.label) ?? 0) + x.bandwidth() / 2)
+            .attr('y', (d) => y(d.value) - 6)
             .attr('text-anchor', 'middle')
-            .attr('dy', '-0.15em')
-            .style('font-size', '18px')
+            .style('font-size', '11px')
             .style('font-weight', '600')
             .style('font-family', tokens.fontFamilyBase)
             .style('font-variant-numeric', 'tabular-nums')
             .attr('fill', tokens.colorNeutralForeground1)
-            .text(String(total));
+            .text((d) => (d.value > 0 ? `AED ${Math.round(d.value).toLocaleString('en-US')}` : '—'));
 
-        g.append('text')
+        g.selectAll('text.tier-approver')
+            .data(data)
+            .enter()
+            .append('text')
+            .attr('class', 'tier-approver')
+            .attr('x', (d) => (x(d.label) ?? 0) + x.bandwidth() / 2)
+            .attr('y', innerHeight + 16)
             .attr('text-anchor', 'middle')
-            .attr('dy', '1.3em')
             .style('font-size', '10px')
             .style('font-family', tokens.fontFamilyBase)
             .attr('fill', tokens.colorNeutralForeground3)
-            .text('Requisitions');
-    }, [data, total]);
+            .text((d) => d.approver);
+    }, [data]);
 
     return (
         <svg
             ref={svgRef}
             role="img"
-            aria-label="Requisitions by value tier"
+            aria-label="Spend by value tier"
             style={{ width: '100%', height: 'auto', display: 'block' }}
         />
     );
@@ -617,7 +728,7 @@ function MonthlyTrendChart(props: { data: { key: string; label: string; count: n
             .attr('x', (d) => x(d.label) ?? 0)
             .attr('width', x.bandwidth())
             .attr('rx', 3)
-            .attr('fill', tokens.colorBrandForeground1);
+            .attr('fill', BRAND_NAVY);
 
         if (shouldAnimate) {
             bars
@@ -656,6 +767,10 @@ const GeneratedComponent = (props: GeneratedComponentProps) => {
         const cached = winAny[CACHE_KEY] as RequisitionRecord[] | undefined;
         return { records: cached ?? [], loading: cached === undefined, error: null };
     });
+    const [costCentreData, setCostCentreData] = useState<{ records: CostCentreRecord[]; loading: boolean; error: string | null }>(() => {
+        const cached = winAny[COSTCENTRE_CACHE_KEY] as CostCentreRecord[] | undefined;
+        return { records: cached ?? [], loading: cached === undefined, error: null };
+    });
     const [search, setSearch] = useState('');
     const [tierFilter, setTierFilter] = useState<string>('all');
     const [reloadKey, setReloadKey] = useState(0);
@@ -683,6 +798,8 @@ const GeneratedComponent = (props: GeneratedComponentProps) => {
                         'wksp_valuetier',
                         'wksp_totalvalue',
                         'wksp_datesubmitted',
+                        'wksp_riskscore',
+                        'wksp_risklevel',
                         '_wksp_requesterid_value',
                         '_wksp_currentapproverid_value',
                     ],
@@ -698,6 +815,8 @@ const GeneratedComponent = (props: GeneratedComponentProps) => {
                         dateSubmitted: parseDate(row.wksp_datesubmitted),
                         requesterName: getFormattedValue(row, '_wksp_requesterid_value'),
                         approverName: getFormattedValue(row, '_wksp_currentapproverid_value'),
+                        riskScore: typeof row.wksp_riskscore === 'number' ? row.wksp_riskscore : 0,
+                        riskLevel: row.wksp_risklevel as unknown as number,
                     }));
                     winAny[CACHE_KEY] = mapped;
                     return mapped;
@@ -724,6 +843,60 @@ const GeneratedComponent = (props: GeneratedComponentProps) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dataReady, reloadKey]);
 
+    useEffect(() => {
+        if (!dataReady) return;
+
+        const cached = winAny[COSTCENTRE_CACHE_KEY] as CostCentreRecord[] | undefined;
+        if (cached !== undefined) {
+            if (costCentreData.records !== cached) setCostCentreData({ records: cached, loading: false, error: null });
+            return;
+        }
+        let cancelled = false;
+
+        let inflight = winAny[COSTCENTRE_INFLIGHT_KEY] as Promise<CostCentreRecord[]> | undefined;
+        if (!inflight) {
+            inflight = dataApi
+                .queryTable('wksp_costcentre', {
+                    select: ['wksp_costcentreid', 'wksp_name', 'wksp_monthlybudget', 'wksp_committedamount'],
+                    pageSize: 500,
+                })
+                .then((result) => {
+                    const mapped: CostCentreRecord[] = (result.rows as unknown as ReadableCostCentre[]).map((row) => ({
+                        id: row.wksp_costcentreid,
+                        name: row.wksp_name ?? '—',
+                        monthlyBudget: typeof row.wksp_monthlybudget === 'number' ? row.wksp_monthlybudget : 0,
+                        committedAmount: typeof row.wksp_committedamount === 'number' ? row.wksp_committedamount : 0,
+                    }));
+                    winAny[COSTCENTRE_CACHE_KEY] = mapped;
+                    return mapped;
+                })
+                .finally(() => {
+                    if (winAny[COSTCENTRE_INFLIGHT_KEY] === inflight) delete winAny[COSTCENTRE_INFLIGHT_KEY];
+                });
+            winAny[COSTCENTRE_INFLIGHT_KEY] = inflight;
+        }
+
+        inflight
+            .then((rows) => {
+                if (!cancelled) setCostCentreData({ records: rows, loading: false, error: null });
+            })
+            .catch((err) => {
+                if (cancelled) return;
+                const message = err instanceof Error ? err.message : 'Unable to load cost centres.';
+                setCostCentreData({ records: [], loading: false, error: message });
+            });
+
+        return () => {
+            cancelled = true;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [dataReady, reloadKey]);
+
+    const openRecords = useMemo(
+        () => data.records.filter((r) => !CLOSED_STATUS_VALUES.includes(r.status)),
+        [data.records],
+    );
+
     const kpis = useMemo(() => {
         const records = data.records;
         const total = records.length;
@@ -731,8 +904,11 @@ const GeneratedComponent = (props: GeneratedComponentProps) => {
         const pending = records.filter((r) => PENDING_STATUS_VALUES.includes(r.status)).length;
         const approved = records.filter((r) => r.status === 100000003).length;
         const rejected = records.filter((r) => r.status === 100000004).length;
-        return { total, totalValue, pending, approved, rejected };
-    }, [data.records]);
+        const highRiskOpen = openRecords.filter((r) => r.riskLevel === 100000002);
+        const highRiskCount = highRiskOpen.length;
+        const highRiskExposure = highRiskOpen.reduce((sum, r) => sum + (Number.isFinite(r.totalValue) ? r.totalValue : 0), 0);
+        return { total, totalValue, pending, approved, rejected, highRiskCount, highRiskExposure };
+    }, [data.records, openRecords]);
 
     const statusDistribution = useMemo(
         () =>
@@ -748,10 +924,35 @@ const GeneratedComponent = (props: GeneratedComponentProps) => {
         () =>
             VALUETIER_META.map((meta) => ({
                 label: meta.label,
-                count: data.records.filter((r) => r.valueTier === meta.value).length,
+                value: data.records
+                    .filter((r) => r.valueTier === meta.value)
+                    .reduce((sum, r) => sum + (Number.isFinite(r.totalValue) ? r.totalValue : 0), 0),
                 color: meta.chartColor,
+                approver: meta.approver,
             })),
         [data.records],
+    );
+
+    const riskMix = useMemo(
+        () =>
+            RISK_LEVEL_META.map((meta) => ({
+                label: meta.label,
+                count: openRecords.filter((r) => r.riskLevel === meta.value).length,
+                color: meta.chartColor,
+            })),
+        [openRecords],
+    );
+
+    const riskMixTotal = riskMix.reduce((sum, r) => sum + r.count, 0);
+
+    const sortedCostCentres = useMemo(
+        () =>
+            [...costCentreData.records].sort((a, b) => {
+                const pctA = a.monthlyBudget > 0 ? a.committedAmount / a.monthlyBudget : -1;
+                const pctB = b.monthlyBudget > 0 ? b.committedAmount / b.monthlyBudget : -1;
+                return pctB - pctA;
+            }),
+        [costCentreData.records],
     );
 
     const monthlyTrend = useMemo(() => {
@@ -864,18 +1065,43 @@ const GeneratedComponent = (props: GeneratedComponentProps) => {
                     );
                 },
             }),
+            createTableColumn<RequisitionRecord>({
+                columnId: 'risk',
+                compare: (a, b) => a.riskScore - b.riskScore,
+                renderHeaderCell: () => 'Risk',
+                renderCell: (item) => {
+                    const meta = getRiskLevelMeta(item.riskLevel);
+                    return (
+                        <TableCellLayout>
+                            <span
+                                className={styles.riskPill}
+                                style={{ backgroundColor: meta.chartColor, color: meta.value === 100000001 ? BRAND_NAVY : '#FFFFFF' }}
+                                title={meta.label}
+                            >
+                                {item.riskScore}
+                            </span>
+                        </TableCellLayout>
+                    );
+                },
+            }),
         ],
-        [],
+        [styles.riskPill],
     );
 
     const handleRefresh = () => {
         delete winAny[CACHE_KEY];
         delete winAny[INFLIGHT_KEY];
+        delete winAny[COSTCENTRE_CACHE_KEY];
+        delete winAny[COSTCENTRE_INFLIGHT_KEY];
         setData((prev) => ({ ...prev, loading: true, error: null }));
+        setCostCentreData((prev) => ({ ...prev, loading: true, error: null }));
         setReloadKey((k) => k + 1);
     };
 
-    if (data.loading) {
+    const isLoading = data.loading || costCentreData.loading;
+    const combinedError = data.error ?? costCentreData.error;
+
+    if (isLoading) {
         return (
             <div className={styles.root} ref={setContainer}>
                 <div className={styles.spinnerWrap}>
@@ -889,11 +1115,11 @@ const GeneratedComponent = (props: GeneratedComponentProps) => {
         <div className={styles.root} ref={setContainer}>
             <header className={styles.header}>
                 <div className={styles.headerTextGroup}>
-                    <Text as="h1" size={700} weight="semibold">
+                    <Text as="h1" size={700} weight="bold" style={{ color: BRAND_NAVY }}>
                         Requisition analytics
                     </Text>
                     <Text size={300} className={styles.subtitle}>
-                        KPI overview of workshop purchase requisitions by status, value tier, and month, with a quick view of what is pending approval.
+                        KPI overview of workshop purchase requisitions by status, value tier, cost-centre budget, and risk mix, with a quick view of what is pending approval.
                     </Text>
                 </div>
                 <Button
@@ -906,9 +1132,9 @@ const GeneratedComponent = (props: GeneratedComponentProps) => {
                 </Button>
             </header>
 
-            {data.error && (
+            {combinedError && (
                 <div role="alert" className={styles.errorBanner}>
-                    {data.error}
+                    {combinedError}
                 </div>
             )}
 
@@ -947,7 +1173,19 @@ const GeneratedComponent = (props: GeneratedComponentProps) => {
                         value={String(kpis.rejected)}
                         accentBg={tokens.colorPaletteRedBackground2}
                     />
+                    <KpiCard
+                        icon={<ShieldErrorRegular style={{ color: BRAND_RED }} />}
+                        label="High-risk open"
+                        value={String(kpis.highRiskCount)}
+                        accentBg="#FFE1E5"
+                        danger
+                    />
                 </div>
+                {kpis.highRiskCount > 0 && (
+                    <Text size={200} className={styles.subtitle}>
+                        {formatCurrency(kpis.highRiskExposure)} exposure across {kpis.highRiskCount} high-risk open requisition{kpis.highRiskCount === 1 ? '' : 's'}.
+                    </Text>
+                )}
             </section>
 
             <div className={styles.chartsRow}>
@@ -971,24 +1209,113 @@ const GeneratedComponent = (props: GeneratedComponentProps) => {
                     <div className={styles.chartTitleRow}>
                         <ChartMultipleRegular />
                         <Text id="tier-chart-heading" weight="semibold">
-                            Requisitions by value tier
+                            Spend by value tier
                         </Text>
                     </div>
-                    <div className={styles.tierBody}>
-                        <div className={styles.tierChartWrap}>
-                            <ValueTierDonutChart data={tierDistribution} total={kpis.total} />
+                    {kpis.total === 0 ? (
+                        <div className={styles.emptyState}>
+                            <Text>No requisitions found.</Text>
                         </div>
-                        <div className={styles.legend}>
-                            {tierDistribution.map((t) => (
-                                <div className={styles.legendRow} key={t.label}>
-                                    <span className={styles.legendSwatch} style={{ backgroundColor: t.color }} />
-                                    <Text size={200}>
-                                        {t.label} ({t.count})
-                                    </Text>
-                                </div>
-                            ))}
-                        </div>
+                    ) : (
+                        <SpendByTierChart data={tierDistribution} />
+                    )}
+                </section>
+            </div>
+
+            <div className={styles.chartsRow}>
+                <section className={styles.chartCard} aria-labelledby="risk-mix-heading" style={{ flex: '1 1 340px' }}>
+                    <div className={styles.chartTitleRow}>
+                        <ShieldTaskRegular />
+                        <Text id="risk-mix-heading" weight="semibold">
+                            Risk mix
+                        </Text>
                     </div>
+                    <Text size={200} className={styles.subtitle}>
+                        Includes open requisitions only (excludes Rejected and Received).
+                    </Text>
+                    {riskMixTotal === 0 ? (
+                        <div className={styles.emptyState}>
+                            <Text>No open requisitions to score.</Text>
+                        </div>
+                    ) : (
+                        <>
+                            <div
+                                className={styles.riskMixBar}
+                                role="img"
+                                aria-label={`Risk mix: ${riskMix.map((r) => `${r.count} ${r.label.toLowerCase()}`).join(', ')}`}
+                            >
+                                {riskMix.map((r) => (
+                                    <span
+                                        key={r.label}
+                                        style={{
+                                            backgroundColor: r.color,
+                                            flexGrow: r.count > 0 ? r.count : 0,
+                                            flexBasis: 0,
+                                            minWidth: r.count > 0 ? '4px' : 0,
+                                        }}
+                                    />
+                                ))}
+                            </div>
+                            <div className={styles.legend}>
+                                {riskMix.map((r) => (
+                                    <div className={styles.legendRow} key={r.label}>
+                                        <span className={styles.legendSwatch} style={{ backgroundColor: r.color }} />
+                                        <Text size={200}>
+                                            {r.label} ({r.count})
+                                        </Text>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </section>
+
+                <section className={styles.chartCard} aria-labelledby="budget-heading" style={{ flex: '1 1 340px' }}>
+                    <div className={styles.chartTitleRow}>
+                        <WalletRegular />
+                        <Text id="budget-heading" weight="semibold">
+                            Cost centre budget
+                        </Text>
+                    </div>
+                    {sortedCostCentres.length === 0 ? (
+                        <div className={styles.emptyState}>
+                            <Text>No cost centres found.</Text>
+                        </div>
+                    ) : (
+                        <div className={styles.costCentreList}>
+                            {sortedCostCentres.map((c) => {
+                                const hasBudget = c.monthlyBudget > 0;
+                                const pct = hasBudget ? Math.round((c.committedAmount / c.monthlyBudget) * 100) : null;
+                                const fillColor = pct === null ? tokens.colorNeutralForeground3 : pct > 100 ? BRAND_RED : pct >= 90 ? GOLD : BRAND_NAVY;
+                                const fillWidth = pct === null ? '0%' : `${Math.min(100, pct)}%`;
+                                return (
+                                    <div className={styles.costCentreRow} key={c.id}>
+                                        <div className={styles.sectionHeader}>
+                                            <Text size={300} weight="semibold">
+                                                {c.name}
+                                            </Text>
+                                            <Text size={200} className={styles.subtitle}>
+                                                {hasBudget
+                                                    ? `${formatCurrency(c.committedAmount)} of ${formatCurrency(c.monthlyBudget)} · ${pct}% committed`
+                                                    : 'No budget set'}
+                                            </Text>
+                                        </div>
+                                        <div
+                                            className={styles.costCentreTrack}
+                                            role="img"
+                                            aria-label={
+                                                hasBudget
+                                                    ? `${c.name}: ${pct}% of budget committed`
+                                                    : `${c.name}: no budget set`
+                                            }
+                                        >
+                                            <div className={styles.costCentreFill} style={{ width: fillWidth, backgroundColor: fillColor }} />
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                 </section>
             </div>
 
@@ -1011,8 +1338,8 @@ const GeneratedComponent = (props: GeneratedComponentProps) => {
             <section className={styles.tableSection} aria-labelledby="pending-heading">
                 <div className={styles.sectionHeader}>
                     <div className={styles.sectionTitleGroup}>
-                        <ClockRegular />
-                        <Text id="pending-heading" size={500} weight="semibold">
+                        <ClockRegular style={{ color: BRAND_NAVY }} />
+                        <Text id="pending-heading" size={500} weight="bold" style={{ color: BRAND_NAVY }}>
                             Pending approval ({filteredPending.length})
                         </Text>
                     </div>
@@ -1046,11 +1373,12 @@ const GeneratedComponent = (props: GeneratedComponentProps) => {
                 </div>
 
                 {filteredPending.length === 0 ? (
-                    <div className={styles.emptyState}>
+                    <div className={`${styles.emptyState} ${styles.tableCard}`}>
                         <FilterRegular fontSize={24} />
                         <Text>No pending requisitions match the current search or filter.</Text>
                     </div>
                 ) : (
+                    <div className={styles.tableCard}>
                     <DataGrid
                         items={filteredPending}
                         columns={columns}
@@ -1065,10 +1393,11 @@ const GeneratedComponent = (props: GeneratedComponentProps) => {
                             totalValue: { idealWidth: 130, minWidth: 110 },
                             dateSubmitted: { idealWidth: 140, minWidth: 120 },
                             status: { idealWidth: 130, minWidth: 110 },
+                            risk: { idealWidth: 90, minWidth: 80 },
                         }}
                         aria-label="Pending approval requisitions"
                     >
-                        <DataGridHeader>
+                        <DataGridHeader className={styles.tableHeaderRow}>
                             <DataGridRow>
                                 {({ renderHeaderCell }) => <DataGridHeaderCell>{renderHeaderCell()}</DataGridHeaderCell>}
                             </DataGridRow>
@@ -1081,6 +1410,7 @@ const GeneratedComponent = (props: GeneratedComponentProps) => {
                             )}
                         </DataGridBody>
                     </DataGrid>
+                    </div>
                 )}
             </section>
         </div>
@@ -1088,3 +1418,4 @@ const GeneratedComponent = (props: GeneratedComponentProps) => {
 };
 
 export default GeneratedComponent;
+
