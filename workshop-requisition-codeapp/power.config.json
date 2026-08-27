@@ -1,0 +1,56 @@
+{
+  "version": "1.0",
+  "appId": "11111111-1111-1111-1111-111111111111",
+  "appDisplayName": "Workshop Requisition Approval",
+  "region": "prod",
+  "appType": "CodeApp",
+  "environmentId": "00000000-0000-0000-0000-000000000000",
+  "description": " ",
+  "buildPath": "./dist",
+  "buildEntryPoint": "index.html",
+  "localAppUrl": "http://localhost:3000",
+  "logoPath": "Default",
+  "connectionReferences": {},
+  "databaseReferences": {
+    "default.cds": {
+      "dataSources": {
+        "requisitions": {
+          "entitySetName": "wksp_requisitions",
+          "logicalName": "wksp_requisition",
+          "isHidden": false
+        },
+        "requisitionlineitems": {
+          "entitySetName": "wksp_requisitionlineitems",
+          "logicalName": "wksp_requisitionlineitem",
+          "isHidden": false
+        },
+        "suppliers": {
+          "entitySetName": "wksp_suppliers",
+          "logicalName": "wksp_supplier",
+          "isHidden": false
+        },
+        "approvalhistories": {
+          "entitySetName": "wksp_approvalhistories",
+          "logicalName": "wksp_approvalhistory",
+          "isHidden": false
+        },
+        "costcentres": {
+          "entitySetName": "wksp_costcentres",
+          "logicalName": "wksp_costcentre",
+          "isHidden": false
+        },
+        "users": {
+          "entitySetName": "systemusers",
+          "logicalName": "systemuser",
+          "isHidden": false
+        },
+        "environmentvariablevalues": {
+          "entitySetName": "environmentvariablevalues",
+          "logicalName": "environmentvariablevalue",
+          "isHidden": false
+        }
+      },
+      "environmentVariableName": ""
+    }
+  }
+}
