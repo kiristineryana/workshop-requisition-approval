@@ -60,8 +60,112 @@
           "displayName": "Date Submitted",
           "type": "DateTime",
           "dateFormat": "DateAndTime"
+        },
+        {
+          "schemaName": "wksp_branchworkshop",
+          "displayName": "Branch / Workshop",
+          "type": "Text"
+        },
+        {
+          "schemaName": "wksp_jobcardnumber",
+          "displayName": "Job Card No.",
+          "type": "Text"
+        },
+        {
+          "schemaName": "wksp_repairordertype",
+          "displayName": "Repair Order Type",
+          "type": "Choice",
+          "options": [
+            "Customer Pay",
+            "Warranty",
+            "Internal"
+          ]
+        },
+        {
+          "schemaName": "wksp_customername",
+          "displayName": "Customer Name",
+          "type": "Text"
+        },
+        {
+          "schemaName": "wksp_vehiclemodelyear",
+          "displayName": "Vehicle Model / Year",
+          "type": "Text"
+        },
+        {
+          "schemaName": "wksp_regnovin",
+          "displayName": "Reg. No. / VIN",
+          "type": "Text"
+        },
+        {
+          "schemaName": "wksp_odometerkm",
+          "displayName": "Odometer (KM)",
+          "type": "Integer",
+          "minValue": 0
+        },
+        {
+          "schemaName": "wksp_vehicleoffroad",
+          "displayName": "Vehicle Off Road (VOR)",
+          "type": "Boolean",
+          "trueLabel": "Yes",
+          "falseLabel": "No"
+        },
+        {
+          "schemaName": "wksp_requiredby",
+          "displayName": "Required By",
+          "type": "DateTime",
+          "dateFormat": "DateOnly"
+        },
+        {
+          "schemaName": "wksp_paymentterms",
+          "displayName": "Payment Terms",
+          "type": "Choice",
+          "options": [
+            "30 Days Credit",
+            "60 Days Credit",
+            "Cash"
+          ]
+        },
+        {
+          "schemaName": "wksp_priority",
+          "displayName": "Priority",
+          "type": "Choice",
+          "options": [
+            "Urgent",
+            "Normal",
+            "Low"
+          ]
+        },
+        {
+          "schemaName": "wksp_quotesattached",
+          "displayName": "Quotes Attached",
+          "type": "Integer",
+          "minValue": 0
+        },
+        {
+          "schemaName": "wksp_riskscore",
+          "displayName": "Risk Score",
+          "type": "Integer",
+          "minValue": 0,
+          "maxValue": 100
+        },
+        {
+          "schemaName": "wksp_risklevel",
+          "displayName": "Risk Level",
+          "type": "Choice",
+          "options": [
+            "Low",
+            "Medium",
+            "High"
+          ]
+        },
+        {
+          "schemaName": "wksp_ageinapprovalhours",
+          "displayName": "Age In Approval (Hours)",
+          "type": "Integer"
         }
-      ]
+      ],
+      "vectorIcon": "wksp_icon_requisition.svg",
+      "iconDescription": "an outlined document with three horizontal lines, like a requisition sheet"
     },
     {
       "schemaName": "wksp_requisitionlineitem",
@@ -130,8 +234,19 @@
           "displayName": "Phone",
           "type": "Text",
           "format": "Phone"
+        },
+        {
+          "schemaName": "wksp_contractstatus",
+          "displayName": "Contract Status",
+          "type": "Choice",
+          "options": [
+            "On-Contract",
+            "Off-Contract"
+          ]
         }
-      ]
+      ],
+      "vectorIcon": "wksp_icon_supplier.svg",
+      "iconDescription": "an outlined warehouse/building with a peaked roof"
     },
     {
       "schemaName": "wksp_approvalhistory",
@@ -175,6 +290,29 @@
           "type": "DateTime",
           "required": true,
           "dateFormat": "DateAndTime"
+        }
+      ],
+      "vectorIcon": "wksp_icon_approvalhistory.svg",
+      "iconDescription": "an outlined clock face with hands pointing to a past time"
+    },
+    {
+      "schemaName": "wksp_costcentre",
+      "displayName": "Cost Centre",
+      "pluralName": "Cost Centres",
+      "primaryAttribute": {
+        "schemaName": "wksp_name",
+        "displayName": "Cost Centre Name"
+      },
+      "columns": [
+        {
+          "schemaName": "wksp_monthlybudget",
+          "displayName": "Monthly Budget",
+          "type": "Money"
+        },
+        {
+          "schemaName": "wksp_committedamount",
+          "displayName": "Committed Amount",
+          "type": "Money"
         }
       ]
     }
@@ -236,6 +374,25 @@
         "schemaName": "wksp_ApproverId",
         "displayName": "Approver"
       }
+    },
+    {
+      "type": "OneToMany",
+      "referenced": "wksp_costcentre",
+      "referencing": "wksp_requisition",
+      "lookup": {
+        "schemaName": "wksp_CostCentreId",
+        "displayName": "Cost Centre"
+      }
+    },
+    {
+      "type": "OneToMany",
+      "referenced": "wksp_requisition",
+      "referencing": "wksp_requisition",
+      "schemaName": "wksp_requisition_duplicateof",
+      "lookup": {
+        "schemaName": "wksp_DuplicateOfId",
+        "displayName": "Duplicate Of"
+      }
     }
   ],
   "webResources": [
@@ -243,7 +400,31 @@
       "name": "wksp_requisition.js",
       "displayName": "Workshop Requisition Form Scripts",
       "type": "js",
-      "content": "var Wksp = window.Wksp || {};\nWksp.Requisition = {\n  STATUS_DRAFT: 100000000,\n  onLoad: function (executionContext) {\n    var formContext = executionContext.getFormContext();\n    Wksp.Requisition.toggleApproverVisibility(formContext);\n    Wksp.Requisition.toggleJustificationRequired(formContext);\n  },\n  onStatusChange: function (executionContext) {\n    Wksp.Requisition.toggleApproverVisibility(executionContext.getFormContext());\n  },\n  onTotalValueChange: function (executionContext) {\n    Wksp.Requisition.toggleJustificationRequired(executionContext.getFormContext());\n  },\n  toggleApproverVisibility: function (formContext) {\n    var statusAttr = formContext.getAttribute('wksp_status');\n    var approverControl = formContext.getControl('wksp_currentapproverid');\n    if (!statusAttr || !approverControl) return;\n    approverControl.setVisible(statusAttr.getValue() !== Wksp.Requisition.STATUS_DRAFT);\n  },\n  toggleJustificationRequired: function (formContext) {\n    var totalAttr = formContext.getAttribute('wksp_totalvalue');\n    var justificationAttr = formContext.getAttribute('wksp_justification');\n    if (!totalAttr || !justificationAttr) return;\n    var total = totalAttr.getValue() || 0;\n    justificationAttr.setRequiredLevel(total >= 10000 ? 'required' : 'none');\n  }\n};\n\nWksp.LineItem = {\n  onLoad: function (executionContext) {\n    var formContext = executionContext.getFormContext();\n    Wksp.LineItem.recalculateLineTotal(formContext);\n    Wksp.LineItem.lockIfRequisitionNotEditable(formContext);\n  },\n  onQuantityOrPriceChange: function (executionContext) {\n    Wksp.LineItem.recalculateLineTotal(executionContext.getFormContext());\n  },\n  recalculateLineTotal: function (formContext) {\n    var qtyAttr = formContext.getAttribute('wksp_quantity');\n    var priceAttr = formContext.getAttribute('wksp_unitprice');\n    var totalAttr = formContext.getAttribute('wksp_linetotal');\n    if (!qtyAttr || !priceAttr || !totalAttr) return;\n    var qty = qtyAttr.getValue() || 0;\n    var price = priceAttr.getValue() || 0;\n    totalAttr.setValue(qty * price);\n  },\n  lockIfRequisitionNotEditable: function (formContext) {\n    var parentAttr = formContext.getAttribute('wksp_parentrequisitionid');\n    if (!parentAttr) return;\n    var parentRef = parentAttr.getValue();\n    if (!parentRef || !parentRef[0]) return;\n    Xrm.WebApi.retrieveRecord('wksp_requisition', parentRef[0].id, '?$select=wksp_status').then(\n      function (result) {\n        var DRAFT = 100000000, SUBMITTED = 100000001;\n        if (result.wksp_status === DRAFT || result.wksp_status === SUBMITTED) return;\n        formContext.ui.controls.forEach(function (control) {\n          if (control.setDisabled) control.setDisabled(true);\n        });\n      },\n      function () { /* new/unsaved parent - leave editable */ }\n    );\n  }\n};"
+      "content": "var Wksp = window.Wksp || {};\nWksp.Requisition = {\n  STATUS_DRAFT: 100000000,\n  onLoad: function (executionContext) {\n    var formContext = executionContext.getFormContext();\n    Wksp.Requisition.toggleApproverVisibility(formContext);\n    Wksp.Requisition.toggleJustificationRequired(formContext);\n    Wksp.Requisition.toggleDuplicateWarning(formContext);\n  },\n  onStatusChange: function (executionContext) {\n    Wksp.Requisition.toggleApproverVisibility(executionContext.getFormContext());\n  },\n  onTotalValueChange: function (executionContext) {\n    Wksp.Requisition.toggleJustificationRequired(executionContext.getFormContext());\n  },\n  toggleApproverVisibility: function (formContext) {\n    var statusAttr = formContext.getAttribute('wksp_status');\n    var approverControl = formContext.getControl('wksp_currentapproverid');\n    if (!statusAttr || !approverControl) return;\n    approverControl.setVisible(statusAttr.getValue() !== Wksp.Requisition.STATUS_DRAFT);\n  },\n  toggleDuplicateWarning: function (executionContextOrFormContext) {\n    var formContext = executionContextOrFormContext.getFormContext ? executionContextOrFormContext.getFormContext() : executionContextOrFormContext;\n    var dupAttr = formContext.getAttribute('wksp_duplicateofid');\n    if (!dupAttr) return;\n    var dupRef = dupAttr.getValue();\n    if (dupRef && dupRef[0]) {\n      formContext.ui.setFormNotification('Possible duplicate: ' + dupRef[0].name + '. Review before submitting.', 'WARNING', 'wksp_duplicate_warning');\n    } else if (formContext.ui.clearFormNotification) {\n      formContext.ui.clearFormNotification('wksp_duplicate_warning');\n    }\n  },\n  toggleJustificationRequired: function (formContext) {\n    var totalAttr = formContext.getAttribute('wksp_totalvalue');\n    var justificationAttr = formContext.getAttribute('wksp_justification');\n    if (!totalAttr || !justificationAttr) return;\n    var total = totalAttr.getValue() || 0;\n    justificationAttr.setRequiredLevel(total >= 10000 ? 'required' : 'none');\n  }\n};\n\nWksp.LineItem = {\n  onLoad: function (executionContext) {\n    var formContext = executionContext.getFormContext();\n    Wksp.LineItem.recalculateLineTotal(formContext);\n    Wksp.LineItem.lockIfRequisitionNotEditable(formContext);\n  },\n  onQuantityOrPriceChange: function (executionContext) {\n    Wksp.LineItem.recalculateLineTotal(executionContext.getFormContext());\n  },\n  recalculateLineTotal: function (formContext) {\n    var qtyAttr = formContext.getAttribute('wksp_quantity');\n    var priceAttr = formContext.getAttribute('wksp_unitprice');\n    var totalAttr = formContext.getAttribute('wksp_linetotal');\n    if (!qtyAttr || !priceAttr || !totalAttr) return;\n    var qty = qtyAttr.getValue() || 0;\n    var price = priceAttr.getValue() || 0;\n    totalAttr.setValue(qty * price);\n  },\n  lockIfRequisitionNotEditable: function (formContext) {\n    var parentAttr = formContext.getAttribute('wksp_parentrequisitionid');\n    if (!parentAttr) return;\n    var parentRef = parentAttr.getValue();\n    if (!parentRef || !parentRef[0]) return;\n    Xrm.WebApi.retrieveRecord('wksp_requisition', parentRef[0].id, '?$select=wksp_status').then(\n      function (result) {\n        var DRAFT = 100000000, SUBMITTED = 100000001;\n        if (result.wksp_status === DRAFT || result.wksp_status === SUBMITTED) return;\n        formContext.ui.controls.forEach(function (control) {\n          if (control.setDisabled) control.setDisabled(true);\n        });\n      },\n      function () { /* new/unsaved parent - leave editable */ }\n    );\n  }\n};"
+    },
+    {
+      "name": "wksp_icon_requisition.svg",
+      "displayName": "Requisition Icon",
+      "type": "svg",
+      "content": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"5\" y=\"3\" width=\"14\" height=\"18\" rx=\"2\"/><path d=\"M9 8h6M9 12h6M9 16h3\"/></svg>"
+    },
+    {
+      "name": "wksp_icon_supplier.svg",
+      "displayName": "Supplier Icon",
+      "type": "svg",
+      "content": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 20V8l8-4 8 4v12\"/><path d=\"M9 20v-6h6v6\"/></svg>"
+    },
+    {
+      "name": "wksp_icon_approvalhistory.svg",
+      "displayName": "Approval History Icon",
+      "type": "svg",
+      "content": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"8\"/><path d=\"M12 8v4l3 2\"/></svg>"
+    },
+    {
+      "name": "wksp_icon_dashboard.svg",
+      "displayName": "Dashboard Icon",
+      "type": "svg",
+      "content": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 19V9M10 19V5M16 19v-7M22 19H2\"/></svg>"
     }
   ],
   "views": [
@@ -272,7 +453,11 @@
         "wksp_requesterid",
         "wksp_totalvalue",
         "wksp_valuetier",
-        "wksp_datesubmitted"
+        "wksp_datesubmitted",
+        "wksp_currentapproverid",
+        "wksp_riskscore",
+        "wksp_risklevel",
+        "wksp_ageinapprovalhours"
       ],
       "filters": [
         {
@@ -352,6 +537,44 @@
               ]
             }
           ]
+        },
+        {
+          "label": "Job & Vehicle Context",
+          "sections": [
+            {
+              "label": "Requester & job context",
+              "columns": 2,
+              "fields": [
+                "wksp_branchworkshop",
+                "wksp_costcentreid",
+                "wksp_jobcardnumber",
+                "wksp_repairordertype",
+                "wksp_customername",
+                "wksp_vehiclemodelyear",
+                "wksp_regnovin",
+                "wksp_odometerkm",
+                "wksp_vehicleoffroad",
+                "wksp_requiredby",
+                "wksp_paymentterms",
+                "wksp_priority"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "Risk & Routing",
+          "sections": [
+            {
+              "label": "Risk assessment",
+              "columns": 2,
+              "fields": [
+                "wksp_riskscore",
+                "wksp_risklevel",
+                "wksp_quotesattached",
+                "wksp_duplicateofid"
+              ]
+            }
+          ]
         }
       ],
       "subgrids": [
@@ -383,6 +606,20 @@
           "attribute": "wksp_totalvalue",
           "library": "wksp_requisition.js",
           "function": "Wksp.Requisition.onTotalValueChange"
+        },
+        {
+          "event": "onchange",
+          "attribute": "wksp_duplicateofid",
+          "library": "wksp_requisition.js",
+          "function": "Wksp.Requisition.toggleDuplicateWarning"
+        }
+      ],
+      "quickViews": [
+        {
+          "lookup": "wksp_costcentreid",
+          "targetEntity": "wksp_costcentre",
+          "form": "Cost Centre Card",
+          "label": "Budget Impact"
         }
       ]
     },
@@ -422,6 +659,18 @@
       "type": "main",
       "name": "Approval History",
       "layout": "auto"
+    },
+    {
+      "entity": "wksp_costcentre",
+      "type": "main",
+      "name": "Cost Centre",
+      "layout": "auto"
+    },
+    {
+      "entity": "wksp_costcentre",
+      "name": "Cost Centre Card",
+      "formType": "QuickView",
+      "layout": "auto"
     }
   ],
   "pages": [
@@ -452,7 +701,8 @@
               },
               {
                 "page": "requisition-analytics",
-                "title": "Dashboards"
+                "title": "Dashboards",
+                "icon": "wksp_icon_dashboard.svg"
               }
             ]
           },
@@ -733,5 +983,12 @@
       ],
       "appAccess": true
     }
-  ]
+  ],
+  "design": {
+    "accentColor": "#D42A41",
+    "density": "comfortable",
+    "cornerRadius": "medium",
+    "darkMode": "system",
+    "layout": "cards"
+  }
 }

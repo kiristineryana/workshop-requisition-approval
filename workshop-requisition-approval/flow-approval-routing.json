@@ -17,6 +17,10 @@
         "frequency": "Minute",
         "interval": 1
       },
+      "evaluatedRecurrence": {
+        "frequency": "Minute",
+        "interval": 1
+      },
       "type": "Recurrence"
     }
   },
@@ -36,7 +40,7 @@
     },
     "List_Submitted_Requisitions": {
       "runAfter": {
-        "Initialize_TotalValue": [
+        "Initialize_HasCleanHistory": [
           "Succeeded"
         ]
       },
@@ -369,7 +373,7 @@
             }
           },
           "runAfter": {
-            "Get_Requester": [
+            "Risk_And_Duplicate_Assessment": [
               "Succeeded"
             ]
           },
@@ -1060,6 +1064,388 @@
             ]
           },
           "type": "If"
+        },
+        "Risk_And_Duplicate_Assessment": {
+          "actions": {
+            "Reset_IsDuplicate": {
+              "runAfter": {},
+              "type": "SetVariable",
+              "inputs": {
+                "name": "IsDuplicate",
+                "value": false
+              }
+            },
+            "Reset_DuplicateRequisitionId": {
+              "runAfter": {
+                "Reset_IsDuplicate": [
+                  "Succeeded"
+                ]
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "DuplicateRequisitionId",
+                "value": ""
+              }
+            },
+            "Reset_IsOffContractSupplier": {
+              "runAfter": {
+                "Reset_DuplicateRequisitionId": [
+                  "Succeeded"
+                ]
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "IsOffContractSupplier",
+                "value": false
+              }
+            },
+            "Reset_HasCleanHistory": {
+              "runAfter": {
+                "Reset_IsOffContractSupplier": [
+                  "Succeeded"
+                ]
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "HasCleanHistory",
+                "value": false
+              }
+            },
+            "Get_Requisition_Details": {
+              "runAfter": {
+                "Reset_HasCleanHistory": [
+                  "Succeeded"
+                ]
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "connectionName": "shared_commondataserviceforapps",
+                  "operationId": "GetItem"
+                },
+                "parameters": {
+                  "entityName": "wksp_requisitions",
+                  "recordId": "@items('Apply_to_each_Requisition')?['wksp_requisitionid']",
+                  "$select": "wksp_jobcardnumber,_wksp_supplierid_value,wksp_quotesattached"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "If_Has_Job_Card": {
+              "actions": {
+                "List_Duplicate_Candidates": {
+                  "runAfter": {},
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "ListRecords"
+                    },
+                    "parameters": {
+                      "entityName": "wksp_requisitions",
+                      "$filter": "@concat('wksp_jobcardnumber eq ''', body('Get_Requisition_Details')?['wksp_jobcardnumber'], ''' and wksp_requisitionid ne ', items('Apply_to_each_Requisition')?['wksp_requisitionid'], ' and createdon ge ', addDays(utcNow(), -14))",
+                      "$select": "wksp_requisitionid",
+                      "$top": 1
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "If_Duplicate_Found": {
+                  "actions": {
+                    "Set_IsDuplicate_True": {
+                      "runAfter": {},
+                      "type": "SetVariable",
+                      "inputs": {
+                        "name": "IsDuplicate",
+                        "value": true
+                      }
+                    },
+                    "Set_DuplicateRequisitionId": {
+                      "runAfter": {
+                        "Set_IsDuplicate_True": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "SetVariable",
+                      "inputs": {
+                        "name": "DuplicateRequisitionId",
+                        "value": "@first(body('List_Duplicate_Candidates')?['value'])?['wksp_requisitionid']"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "List_Duplicate_Candidates": [
+                      "Succeeded"
+                    ]
+                  },
+                  "else": {
+                    "actions": {}
+                  },
+                  "expression": {
+                    "greater": [
+                      "@length(body('List_Duplicate_Candidates')?['value'])",
+                      0
+                    ]
+                  },
+                  "type": "If"
+                }
+              },
+              "runAfter": {
+                "Get_Requisition_Details": [
+                  "Succeeded"
+                ]
+              },
+              "else": {
+                "actions": {}
+              },
+              "expression": {
+                "and": [
+                  {
+                    "not": {
+                      "equals": [
+                        "@body('Get_Requisition_Details')?['wksp_jobcardnumber']",
+                        null
+                      ]
+                    }
+                  },
+                  {
+                    "not": {
+                      "equals": [
+                        "@body('Get_Requisition_Details')?['wksp_jobcardnumber']",
+                        ""
+                      ]
+                    }
+                  }
+                ]
+              },
+              "type": "If"
+            },
+            "If_Has_Supplier": {
+              "actions": {
+                "Get_Supplier": {
+                  "runAfter": {},
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "GetItem"
+                    },
+                    "parameters": {
+                      "entityName": "wksp_suppliers",
+                      "recordId": "@body('Get_Requisition_Details')?['_wksp_supplierid_value']",
+                      "$select": "wksp_contractstatus"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "If_Off_Contract": {
+                  "actions": {
+                    "Set_IsOffContractSupplier_True": {
+                      "runAfter": {},
+                      "type": "SetVariable",
+                      "inputs": {
+                        "name": "IsOffContractSupplier",
+                        "value": true
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "Get_Supplier": [
+                      "Succeeded"
+                    ]
+                  },
+                  "else": {
+                    "actions": {}
+                  },
+                  "expression": {
+                    "equals": [
+                      "@body('Get_Supplier')?['wksp_contractstatus']",
+                      100000001
+                    ]
+                  },
+                  "type": "If"
+                }
+              },
+              "runAfter": {
+                "If_Has_Job_Card": [
+                  "Succeeded"
+                ]
+              },
+              "else": {
+                "actions": {}
+              },
+              "expression": {
+                "not": {
+                  "equals": [
+                    "@body('Get_Requisition_Details')?['_wksp_supplierid_value']",
+                    null
+                  ]
+                }
+              },
+              "type": "If"
+            },
+            "Check_Requester_History": {
+              "runAfter": {
+                "If_Has_Supplier": [
+                  "Succeeded"
+                ]
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "connectionName": "shared_commondataserviceforapps",
+                  "operationId": "ListRecords"
+                },
+                "parameters": {
+                  "entityName": "wksp_requisitions",
+                  "$filter": "@concat('_wksp_requesterid_value eq ', items('Apply_to_each_Requisition')?['_wksp_requesterid_value'], ' and wksp_status eq 100000004')",
+                  "$select": "wksp_requisitionid",
+                  "$top": 1
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "If_No_Past_Rejections": {
+              "actions": {
+                "Set_HasCleanHistory_True": {
+                  "runAfter": {},
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "HasCleanHistory",
+                    "value": true
+                  }
+                }
+              },
+              "runAfter": {
+                "Check_Requester_History": [
+                  "Succeeded"
+                ]
+              },
+              "else": {
+                "actions": {}
+              },
+              "expression": {
+                "equals": [
+                  "@length(body('Check_Requester_History')?['value'])",
+                  0
+                ]
+              },
+              "type": "If"
+            },
+            "Compose_TierBase": {
+              "runAfter": {
+                "If_No_Past_Rejections": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Compose",
+              "inputs": "@if(less(variables('TotalValue'), 1000), 5, if(less(variables('TotalValue'), 10000), 15, 28))"
+            },
+            "Compose_RequiredQuotes": {
+              "runAfter": {
+                "Compose_TierBase": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Compose",
+              "inputs": "@if(less(variables('TotalValue'), 1000), 1, if(less(variables('TotalValue'), 10000), 2, 3))"
+            },
+            "Compose_MissingQuotes": {
+              "runAfter": {
+                "Compose_RequiredQuotes": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Compose",
+              "inputs": "@min(2, max(0, sub(outputs('Compose_RequiredQuotes'), coalesce(body('Get_Requisition_Details')?['wksp_quotesattached'], 0))))"
+            },
+            "Compose_RiskScoreTotal": {
+              "runAfter": {
+                "Compose_MissingQuotes": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Compose",
+              "inputs": "@max(0, min(100, add(add(add(add(outputs('Compose_TierBase'), mul(if(variables('IsOffContractSupplier'), 1, 0), 18)), mul(outputs('Compose_MissingQuotes'), 14)), mul(if(variables('IsDuplicate'), 1, 0), 8)), mul(if(variables('HasCleanHistory'), 1, 0), -4))))"
+            },
+            "Compose_RiskLevel": {
+              "runAfter": {
+                "Compose_RiskScoreTotal": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Compose",
+              "inputs": "@if(greaterOrEquals(outputs('Compose_RiskScoreTotal'), 70), 100000002, if(greaterOrEquals(outputs('Compose_RiskScoreTotal'), 40), 100000001, 100000000))"
+            },
+            "Update_Risk_Fields": {
+              "runAfter": {
+                "Compose_RiskLevel": [
+                  "Succeeded"
+                ]
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "connectionName": "shared_commondataserviceforapps",
+                  "operationId": "UpdateOnlyRecord"
+                },
+                "parameters": {
+                  "entityName": "wksp_requisitions",
+                  "recordId": "@items('Apply_to_each_Requisition')?['wksp_requisitionid']",
+                  "item/wksp_riskscore": "@outputs('Compose_RiskScoreTotal')",
+                  "item/wksp_risklevel": "@outputs('Compose_RiskLevel')"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "If_Is_Duplicate_Set_Link": {
+              "actions": {
+                "Update_Duplicate_Link": {
+                  "runAfter": {},
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "UpdateOnlyRecord"
+                    },
+                    "parameters": {
+                      "entityName": "wksp_requisitions",
+                      "recordId": "@items('Apply_to_each_Requisition')?['wksp_requisitionid']",
+                      "item/wksp_DuplicateOfId@odata.bind": "@concat('wksp_requisitions(', variables('DuplicateRequisitionId'), ')')"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                }
+              },
+              "runAfter": {
+                "Update_Risk_Fields": [
+                  "Succeeded"
+                ]
+              },
+              "else": {
+                "actions": {}
+              },
+              "expression": {
+                "equals": [
+                  "@variables('IsDuplicate')",
+                  true
+                ]
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {
+            "Get_Requester": [
+              "Succeeded"
+            ]
+          },
+          "type": "Scope"
         }
       },
       "runAfter": {
@@ -1073,6 +1459,119 @@
           "repetitions": 1
         }
       }
+    },
+    "Initialize_IsDuplicate": {
+      "runAfter": {
+        "Initialize_TotalValue": [
+          "Succeeded"
+        ]
+      },
+      "type": "InitializeVariable",
+      "inputs": {
+        "variables": [
+          {
+            "name": "IsDuplicate",
+            "type": "boolean",
+            "value": false
+          }
+        ]
+      }
+    },
+    "Initialize_DuplicateRequisitionId": {
+      "runAfter": {
+        "Initialize_IsDuplicate": [
+          "Succeeded"
+        ]
+      },
+      "type": "InitializeVariable",
+      "inputs": {
+        "variables": [
+          {
+            "name": "DuplicateRequisitionId",
+            "type": "string",
+            "value": ""
+          }
+        ]
+      }
+    },
+    "Initialize_IsOffContractSupplier": {
+      "runAfter": {
+        "Initialize_DuplicateRequisitionId": [
+          "Succeeded"
+        ]
+      },
+      "type": "InitializeVariable",
+      "inputs": {
+        "variables": [
+          {
+            "name": "IsOffContractSupplier",
+            "type": "boolean",
+            "value": false
+          }
+        ]
+      }
+    },
+    "Initialize_HasCleanHistory": {
+      "runAfter": {
+        "Initialize_IsOffContractSupplier": [
+          "Succeeded"
+        ]
+      },
+      "type": "InitializeVariable",
+      "inputs": {
+        "variables": [
+          {
+            "name": "HasCleanHistory",
+            "type": "boolean",
+            "value": false
+          }
+        ]
+      }
+    },
+    "List_InApproval_Requisitions": {
+      "runAfter": {},
+      "type": "OpenApiConnection",
+      "inputs": {
+        "host": {
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+          "connectionName": "shared_commondataserviceforapps",
+          "operationId": "ListRecords"
+        },
+        "parameters": {
+          "entityName": "wksp_requisitions",
+          "$filter": "wksp_status eq 100000002",
+          "$select": "wksp_requisitionid,wksp_datesubmitted"
+        },
+        "authentication": "@parameters('$authentication')"
+      }
+    },
+    "Apply_to_each_InApproval_Requisition": {
+      "foreach": "@body('List_InApproval_Requisitions')?['value']",
+      "actions": {
+        "Update_Age_In_Approval": {
+          "runAfter": {},
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "UpdateOnlyRecord"
+            },
+            "parameters": {
+              "entityName": "wksp_requisitions",
+              "recordId": "@items('Apply_to_each_InApproval_Requisition')?['wksp_requisitionid']",
+              "item/wksp_ageinapprovalhours": "@div(sub(ticks(utcNow()), ticks(items('Apply_to_each_InApproval_Requisition')?['wksp_datesubmitted'])), 36000000000)"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        }
+      },
+      "runAfter": {
+        "List_InApproval_Requisitions": [
+          "Succeeded"
+        ]
+      },
+      "type": "Foreach"
     }
   }
 }

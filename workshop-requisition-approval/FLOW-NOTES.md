@@ -27,6 +27,51 @@
   two branches stuck mid-execution. Sequential processing fixed this; real-world usage
   won't normally have bursts like that, but sequential is the correct setting regardless.
 
+## Phase 4 additions: risk scoring, duplicate detection, SLA aging (2026-08-27)
+
+Added to the same polling flow, inserted between `Get_Requester` and the tier branch
+(`Value_Tier_Under_1000`) so every submitted requisition gets scored/flagged regardless of
+outcome:
+
+- **`Risk_And_Duplicate_Assessment`** (Scope, runs once per requisition):
+  - **Duplicate check**: if `wksp_jobcardnumber` is non-blank, lists other requisitions with
+    the same job card number created in the last 14 days. First match found sets
+    `wksp_DuplicateOfId` (via `If_Is_Duplicate_Set_Link`, applied after the risk fields are
+    written).
+  - **Off-contract check**: if a supplier is linked, reads `wksp_contractstatus`; Off-Contract
+    contributes to the score.
+  - **Clean-history check**: lists the requester's own past requisitions with
+    `wksp_status = Rejected (100000004)`; zero hits earns the "clean history" score reduction.
+  - **Risk score** (`Compose_RiskScoreTotal`, written to `wksp_riskscore`): tier base
+    (Under 1,000 = 5 / 1,000–10,000 = 15 / Above 10,000 = 28, computed off the live
+    `TotalValue` variable, not the not-yet-set `wksp_valuetier` field) + off-contract supplier
+    (+18) + missing quotes (+14 per quote short of the tier's requirement — 1/2/3 quotes
+    required by tier — capped at 2 missing) + duplicate found (+8) − clean history (−4),
+    clamped to 0–100.
+  - **Risk level** (`Compose_RiskLevel`, written to `wksp_risklevel`): High ≥ 70, Medium
+    40–69, Low < 40 — matches the wireframe's bands exactly.
+  - **Deviation from the original plan**: `wksp_quotesattached` turned out to be a plain
+    manually-entered Integer field in the actual build, not a Dataverse rollup — so there's no
+    `CalculateRollupField` refresh step; the flow just reads the field's current value
+    directly.
+- **`Apply_to_each_InApproval_Requisition`** (new top-level loop, runs in parallel with the
+  main submitted-requisition loop every poll cycle): lists every requisition currently
+  `In Approval (100000002)` and recomputes `wksp_ageinapprovalhours` from
+  `wksp_datesubmitted` to `utcNow()`. This replaces the one-time "Calculated" field that
+  wasn't achievable natively (see `app-spec.json` history) with a live value that updates on
+  every poll cycle for anything sitting in approval, not just a snapshot taken at submission.
+- **New flow variables** (reset per iteration, same pattern as `TotalValue`/`Reset_TotalValue`):
+  `IsDuplicate`, `DuplicateRequisitionId`, `IsOffContractSupplier`, `HasCleanHistory`.
+
+**Verified end-to-end** on 2026-08-27 with a real off-contract-supplier, zero-quotes,
+duplicate-job-card test case (REQ-001009, duplicate target REQ-001008): flow run picked it
+up, correctly linked `wksp_DuplicateOfId` → REQ-001008, computed `wksp_riskscore = 45`
+(tier base 5 + off-contract 18 + missing-quote 14 + duplicate 8 + no clean-history bonus,
+since the test requester had a prior rejection on record), set `wksp_risklevel` = Medium,
+advanced `wksp_status` to In Approval, assigned the Supervisor as Current Approver, and the
+same run's age-refresher loop stamped `wksp_ageinapprovalhours = 0` for it immediately after
+the status transition — confirming both new pieces execute correctly in the same poll cycle.
+
 ## Known issue: outbound email doesn't send (Office 365 Outlook connector)
 
 Every `SendEmailV2` action in the flow (approval/rejection notifications at every tier)
