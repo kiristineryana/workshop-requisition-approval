@@ -261,11 +261,9 @@ export function RequisitionDetailPage({
     setForm((prev) => (prev ? { ...prev, [key]: value } : prev));
   }
 
-  async function handleSave() {
-    if (!form || !req) return;
-    setSaving(true);
-    setBanner(null);
+  function computeFormChanges(): Partial<Omit<Wksp_requisitionsBase, 'wksp_requisitionid'>> {
     const changes: Partial<Omit<Wksp_requisitionsBase, 'wksp_requisitionid'>> = {};
+    if (!form || !req) return changes;
     const initial = toFormState(req);
     if (form.branchworkshop !== initial.branchworkshop) changes.wksp_branchworkshop = form.branchworkshop;
     if (form.jobcardnumber !== initial.jobcardnumber) changes.wksp_jobcardnumber = form.jobcardnumber;
@@ -288,6 +286,14 @@ export function RequisitionDetailPage({
     if (form.supplierId !== initial.supplierId && form.supplierId) {
       changes['wksp_SupplierId@odata.bind'] = `/wksp_suppliers(${form.supplierId})`;
     }
+    return changes;
+  }
+
+  async function handleSave() {
+    if (!form || !req) return;
+    setSaving(true);
+    setBanner(null);
+    const changes = computeFormChanges();
 
     if (Object.keys(changes).length === 0) {
       setSaving(false);
@@ -325,6 +331,7 @@ export function RequisitionDetailPage({
     setSubmitting(true);
     setBanner(null);
     const result = await Wksp_requisitionsService.update(requisitionId, {
+      ...computeFormChanges(),
       wksp_status: 100000001 as never,
       wksp_datesubmitted: new Date().toISOString(),
     });
