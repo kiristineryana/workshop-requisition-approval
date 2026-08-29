@@ -34,6 +34,8 @@ import { ArrowLeftIcon, PlusIcon, TrashIcon, AlertTriangleIcon } from '../compon
 import { useUserDirectory } from '../lib/users';
 
 const JUSTIFICATION_THRESHOLD = 10000;
+const JOB_CARD_PATTERN = /^JC-[A-Za-z0-9]+(-[A-Za-z0-9]+)*$/;
+const JOB_CARD_HINT = "Must start with 'JC-', e.g. JC-2026-04213";
 
 type FormState = {
   branchworkshop: string;
@@ -211,6 +213,7 @@ export function RequisitionDetailPage({
   );
   const displayTotal = isDraft ? subtotal : req?.wksp_totalvalue ?? 0;
   const justificationRequired = displayTotal >= JUSTIFICATION_THRESHOLD;
+  const jobCardInvalid = !!form && form.jobcardnumber.trim() !== '' && !JOB_CARD_PATTERN.test(form.jobcardnumber.trim());
 
   if (loading) {
     return <div style={{ padding: 40, textAlign: 'center', color: TEXT_MUTED }}>Loading requisition…</div>;
@@ -290,6 +293,7 @@ export function RequisitionDetailPage({
     if (!form.jobcardnumber) missing.push('Job card number');
     if (!form.requiredby) missing.push('Required by');
     if (!form.supplierId) missing.push('Supplier');
+    if (form.jobcardnumber.trim() && !JOB_CARD_PATTERN.test(form.jobcardnumber.trim())) missing.push(`Job card number (${JOB_CARD_HINT})`);
     if (lineItems.length === 0) missing.push('At least one line item');
     if (justificationRequired && !form.justification.trim()) missing.push('Justification');
 
@@ -550,12 +554,15 @@ export function RequisitionDetailPage({
             </Field>
             <Field label="Job card no." required>
               {isDraft ? (
-                <input
-                  style={inputStyle}
-                  placeholder="e.g. JC-2026-04213"
-                  value={form.jobcardnumber}
-                  onChange={(e) => setField('jobcardnumber', e.target.value)}
-                />
+                <>
+                  <input
+                    style={{ ...inputStyle, border: `1px solid ${jobCardInvalid ? BRAND_RED : BORDER}` }}
+                    placeholder="e.g. JC-2026-04213"
+                    value={form.jobcardnumber}
+                    onChange={(e) => setField('jobcardnumber', e.target.value)}
+                  />
+                  <div style={{ fontSize: 10.5, marginTop: 4, color: jobCardInvalid ? BRAND_RED : TEXT_MUTED }}>{JOB_CARD_HINT}</div>
+                </>
               ) : (
                 <div style={readOnlyStyle}>{req.wksp_jobcardnumber ?? '—'}</div>
               )}
