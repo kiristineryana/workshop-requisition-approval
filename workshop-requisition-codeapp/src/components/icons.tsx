@@ -229,3 +229,47 @@ export function StageRejectedIcon({ size = 12, color = 'currentColor', strokeWid
     </svg>
   );
 }
+
+// ---- Line-item category icons — Part / Tool / Sublet / Consumable / Other ----
+
+export function CategoryPartIcon({ size = 12, color = 'currentColor', strokeWidth = 1.7 }: IconProps) {
+  return (
+    <svg {...base(size, strokeWidth, color)}>
+      <path d="M14.7 6.3a3 3 0 0 0-4.2 3.6L4 16.4V20h3.6l6.5-6.5a3 3 0 0 0 3.6-4.2l-2.1 2.1-2-2z" />
+    </svg>
+  );
+}
+
+export function CategoryToolIcon({ size = 12, color = 'currentColor', strokeWidth = 1.7 }: IconProps) {
+  return (
+    <svg {...base(size, strokeWidth, color)}>
+      <path d="M20.5 5.5a4 4 0 0 1-5.4 5.4L6.5 19.5a1.7 1.7 0 0 1-2.4-2.4l8.6-8.6A4 4 0 0 1 18.1 3l-2.6 2.6 1.9 1.9z" />
+    </svg>
+  );
+}
+
+export function CategorySubletIcon({ size = 12, color = 'currentColor', strokeWidth = 1.7 }: IconProps) {
+  return (
+    <svg {...base(size, strokeWidth, color)}>
+      <path d="M3 12h4l2.5-3 4 6L16 12h5" />
+      <path d="M17.5 8.5 21 12l-3.5 3.5" />
+    </svg>
+  );
+}
+
+export function CategoryConsumableIcon({ size = 12, color = 'currentColor', strokeWidth = 1.7 }: IconProps) {
+  return (
+    <svg {...base(size, strokeWidth, color)}>
+      <path d="M12 3.5c2.8 3.6 5 6.9 5 9.5a5 5 0 0 1-10 0c0-2.6 2.2-5.9 5-9.5z" />
+    </svg>
+  );
+}
+
+export function CategoryOtherIcon({ size = 12, color = 'currentColor', strokeWidth = 1.7 }: IconProps) {
+  return (
+    <svg {...base(size, strokeWidth, color)}>
+      <path d="M11.3 3.5h5.2a2 2 0 0 1 2 2v5.2a2 2 0 0 1-.6 1.4l-7.6 7.6a2 2 0 0 1-2.8 0l-4.6-4.6a2 2 0 0 1 0-2.8l7.6-7.6a2 2 0 0 1 1.4-.6z" />
+      <circle cx="15" cy="8" r="1.3" />
+    </svg>
+  );
+}

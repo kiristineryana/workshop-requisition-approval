@@ -3,17 +3,20 @@ export function Pill({
   bg,
   fg,
   outline,
+  icon,
 }: {
   label: string;
   bg: string;
   fg: string;
   outline?: boolean;
+  icon?: React.ReactNode;
 }) {
   return (
     <span
       style={{
         display: 'inline-flex',
         alignItems: 'center',
+        gap: icon ? 5 : 0,
         padding: '2px 10px',
         borderRadius: 999,
         background: bg,
@@ -25,6 +28,7 @@ export function Pill({
         lineHeight: '18px',
       }}
     >
+      {icon}
       {label}
     </span>
   );

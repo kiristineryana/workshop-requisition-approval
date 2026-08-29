@@ -30,7 +30,27 @@ import {
 } from '../lib/choiceMeta';
 import { Pill } from '../components/Pill';
 import { StageTracker } from '../components/StageTracker';
-import { ArrowLeftIcon, PlusIcon, TrashIcon, AlertTriangleIcon } from '../components/icons';
+import {
+  ArrowLeftIcon,
+  PlusIcon,
+  TrashIcon,
+  AlertTriangleIcon,
+  CategoryPartIcon,
+  CategoryToolIcon,
+  CategorySubletIcon,
+  CategoryConsumableIcon,
+  CategoryOtherIcon,
+} from '../components/icons';
+
+// Icon per line-item category — indexed to match CATEGORY_META's order (Part, Tool, Sublet,
+// Consumable, Other) in lib/choiceMeta.ts.
+const CATEGORY_ICONS: Record<number, (props: { size?: number; color?: string }) => React.ReactElement> = {
+  100000000: CategoryPartIcon,
+  100000001: CategoryToolIcon,
+  100000002: CategorySubletIcon,
+  100000003: CategoryConsumableIcon,
+  100000004: CategoryOtherIcon,
+};
 import { useUserDirectory } from '../lib/users';
 
 const JUSTIFICATION_THRESHOLD = 10000;
@@ -1056,7 +1076,15 @@ function LineItemRow({
         </select>
       ) : (
         <div>
-          <Pill label={categoryMeta.label} bg={categoryMeta.bg} fg={categoryMeta.fg} />
+          <Pill
+            label={categoryMeta.label}
+            bg={categoryMeta.bg}
+            fg={categoryMeta.fg}
+            icon={(() => {
+              const CategoryIcon = CATEGORY_ICONS[item.wksp_category as unknown as number];
+              return CategoryIcon ? <CategoryIcon size={11} color={categoryMeta.fg} /> : null;
+            })()}
+          />
         </div>
       )}
       {editable ? (
