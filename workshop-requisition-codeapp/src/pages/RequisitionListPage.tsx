@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Wksp_requisitionsService } from '../generated/services/Wksp_requisitionsService';
 import type { Wksp_requisitions } from '../generated/models/Wksp_requisitionsModel';
-import { BRAND_NAVY, BRAND_RED, SURFACE_MUTED, TEXT_MUTED, TEXT_PRIMARY, BORDER, WHITE } from '../theme';
+import { BRAND_NAVY, BRAND_RED, SURFACE_MUTED, TEXT_MUTED, TEXT_PRIMARY, BORDER, WHITE, FONT_DISPLAY } from '../theme';
 import {
   getStatusMeta,
   getStatusPillStyle,
@@ -12,7 +12,7 @@ import {
   PENDING_STATUS_VALUES,
 } from '../lib/choiceMeta';
 import { Pill } from '../components/Pill';
-import { RefreshIcon, SearchIcon } from '../components/icons';
+import { PlusIcon, RefreshIcon, SearchIcon } from '../components/icons';
 import { useUserDirectory } from '../lib/users';
 
 type ViewKey = 'mine' | 'pending' | 'approvedMonth' | 'rejected' | 'all';
@@ -32,6 +32,7 @@ export function RequisitionListPage({ onSelect }: { onSelect: (id: string) => vo
   const [reloadKey, setReloadKey] = useState(0);
   const [view, setView] = useState<ViewKey>('all');
   const [search, setSearch] = useState('');
+  const [creating, setCreating] = useState(false);
   const { nameById, currentUserId } = useUserDirectory();
 
   useEffect(() => {
@@ -104,6 +105,23 @@ export function RequisitionListPage({ onSelect }: { onSelect: (id: string) => vo
     );
   }, [viewFiltered, search]);
 
+  async function handleCreate() {
+    if (!currentUserId || creating) return;
+    setCreating(true);
+    setError(null);
+    const result = await Wksp_requisitionsService.create({
+      statecode: 0 as never,
+      wksp_status: 100000000 as never,
+      'wksp_RequesterId@odata.bind': `/systemusers(${currentUserId})`,
+    });
+    setCreating(false);
+    if (result.success && result.data) {
+      onSelect(result.data.wksp_requisitionid);
+    } else {
+      setError(result.error?.message ?? 'Could not create requisition.');
+    }
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
@@ -113,25 +131,49 @@ export function RequisitionListPage({ onSelect }: { onSelect: (id: string) => vo
             Workshop purchase requisitions — browse, filter, and open a record to view or submit it.
           </p>
         </div>
-        <button
-          onClick={() => setReloadKey((k) => k + 1)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            border: `1px solid ${BORDER}`,
-            background: WHITE,
-            borderRadius: 8,
-            padding: '8px 14px',
-            fontSize: 13,
-            fontWeight: 600,
-            color: TEXT_PRIMARY,
-            cursor: 'pointer',
-          }}
-        >
-          <RefreshIcon size={14} />
-          Refresh
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            onClick={() => setReloadKey((k) => k + 1)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              border: `1px solid ${BORDER}`,
+              background: WHITE,
+              borderRadius: 8,
+              padding: '8px 14px',
+              fontSize: 13,
+              fontWeight: 600,
+              color: TEXT_PRIMARY,
+              cursor: 'pointer',
+            }}
+          >
+            <RefreshIcon size={14} />
+            Refresh
+          </button>
+          <button
+            onClick={handleCreate}
+            disabled={!currentUserId || creating}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              border: 'none',
+              background: BRAND_RED,
+              borderRadius: 8,
+              padding: '8px 16px',
+              fontSize: 13,
+              fontWeight: 700,
+              fontFamily: FONT_DISPLAY,
+              color: WHITE,
+              cursor: !currentUserId || creating ? 'default' : 'pointer',
+              opacity: !currentUserId || creating ? 0.6 : 1,
+            }}
+          >
+            <PlusIcon size={14} color={WHITE} />
+            {creating ? 'Creating…' : 'New Requisition'}
+          </button>
+        </div>
       </div>
 
       {error && (

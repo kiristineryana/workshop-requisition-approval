@@ -9,7 +9,7 @@ import type { Wksp_requisitionlineitems } from '../generated/models/Wksp_requisi
 import type { Wksp_approvalhistories } from '../generated/models/Wksp_approvalhistoriesModel';
 import type { Wksp_suppliers } from '../generated/models/Wksp_suppliersModel';
 import type { Wksp_costcentres } from '../generated/models/Wksp_costcentresModel';
-import { BRAND_NAVY, BRAND_RED, GOLD, GREEN, SURFACE_MUTED, TEXT_MUTED, TEXT_PRIMARY, BORDER, WHITE, FONT_DISPLAY } from '../theme';
+import { BRAND_NAVY, BRAND_RED, GOLD, GREEN, STAGE_BLUE, SURFACE_MUTED, TEXT_MUTED, TEXT_PRIMARY, BORDER, WHITE, FONT_DISPLAY } from '../theme';
 import {
   getStatusMeta,
   getStatusPillStyle,
@@ -136,6 +136,7 @@ export function RequisitionDetailPage({
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
   const [banner, setBanner] = useState<{ kind: 'error' | 'success'; text: string } | null>(null);
   const { nameById } = useUserDirectory();
 
@@ -312,6 +313,32 @@ export function RequisitionDetailPage({
     }
   }
 
+  async function handleMarkOrdered() {
+    setUpdatingStatus(true);
+    setBanner(null);
+    const result = await Wksp_requisitionsService.update(requisitionId, { wksp_status: 100000005 as never });
+    setUpdatingStatus(false);
+    if (result.success) {
+      setBanner({ kind: 'success', text: 'Marked as Ordered.' });
+      load();
+    } else {
+      setBanner({ kind: 'error', text: result.error?.message ?? 'Could not update status.' });
+    }
+  }
+
+  async function handleMarkReceived() {
+    setUpdatingStatus(true);
+    setBanner(null);
+    const result = await Wksp_requisitionsService.update(requisitionId, { wksp_status: 100000006 as never });
+    setUpdatingStatus(false);
+    if (result.success) {
+      setBanner({ kind: 'success', text: 'Marked as Received.' });
+      load();
+    } else {
+      setBanner({ kind: 'error', text: result.error?.message ?? 'Could not update status.' });
+    }
+  }
+
   async function handleAddLine() {
     const result = await Wksp_requisitionlineitemsService.create({
       statecode: 0 as never,
@@ -434,6 +461,48 @@ export function RequisitionDetailPage({
             }}
           >
             {saving ? 'Saving…' : 'Save'}
+          </button>
+        )}
+        {status === 100000003 && (
+          <button
+            onClick={handleMarkOrdered}
+            disabled={updatingStatus}
+            style={{
+              background: STAGE_BLUE,
+              color: WHITE,
+              border: 'none',
+              borderRadius: 6,
+              height: 34,
+              padding: '0 18px',
+              fontFamily: FONT_DISPLAY,
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: updatingStatus ? 'default' : 'pointer',
+              opacity: updatingStatus ? 0.7 : 1,
+            }}
+          >
+            {updatingStatus ? 'Updating…' : 'Mark as Ordered'}
+          </button>
+        )}
+        {status === 100000005 && (
+          <button
+            onClick={handleMarkReceived}
+            disabled={updatingStatus}
+            style={{
+              background: STAGE_BLUE,
+              color: WHITE,
+              border: 'none',
+              borderRadius: 6,
+              height: 34,
+              padding: '0 18px',
+              fontFamily: FONT_DISPLAY,
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: updatingStatus ? 'default' : 'pointer',
+              opacity: updatingStatus ? 0.7 : 1,
+            }}
+          >
+            {updatingStatus ? 'Updating…' : 'Mark as Received'}
           </button>
         )}
       </div>
