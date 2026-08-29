@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="design_doc_mode" content="canvas"><link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Nunito+Sans:wght@600;700&display=swap" rel="stylesheet"><style>body{margin:0;background:#f0eee9;font-family:'Open Sans',system-ui,sans-serif}a{color:#D42A41}a:hover{color:#B8233A}.dv-turn{padding:40px 44px 32px;border-bottom:1px solid rgba(0,0,0,.08);scroll-margin-top:16px}.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 20px}.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#181059;color:#fff;border-radius:4px;text-decoration:none}.dv-tname{font:600 13px/1.2 'Open Sans',sans-serif;color:#1a1a1a}.dv-opts{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#1a1a1a;border-radius:5px;text-decoration:none}.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 'Open Sans',sans-serif;color:rgba(0,0,0,.55)}.dv-card{max-width:100%;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}.dv-opt:target .dv-oid{background:#D42A41;color:#fff}.dv-next{margin:22px 0 0;font:12px/1.5 'Open Sans',sans-serif;color:rgba(0,0,0,.5)}</style></helmet>
+
+<section class="dv-turn" id="t1" data-screen-label="Turn 1">
+<div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Workshop Purchase Requisition &amp; Approval — model-driven app wireframes</span></div>
+
+<div class="dv-opts">
+
+<!-- ============ 1a PROCESS FLOW ============ -->
+<div class="dv-opt" id="1a" data-screen-label="1a Process flow">
+<div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>Business process flow diagram — 11 steps, icon per process</div>
+<div class="dv-card" style="width:1400px;padding:36px 40px 40px;background:#fff">
+
+<div style="display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1px solid #D9D9D9;padding-bottom:14px;margin-bottom:30px">
+<div>
+<div style="font:700 11px/1 'Open Sans';letter-spacing:.2px;color:#D42A41;text-transform:uppercase">Figure 1 · End-to-end process</div>
+<div style="font:700 24px/1.2 'Open Sans';color:#181059;margin-top:8px">Workshop Purchase Requisition &amp; Approval</div>
+</div>
+<div style="display:flex;gap:22px;font:400 11px/1.4 'Open Sans';color:#757575">
+<div style="display:flex;align-items:center;gap:7px"><span style="width:12px;height:12px;border-radius:999px;border:1.5px solid #181059"></span>Human step</div>
+<div style="display:flex;align-items:center;gap:7px"><span style="width:12px;height:12px;border-radius:999px;border:1.5px dashed #7A81BE"></span>Automated (Power Automate)</div>
+<div style="display:flex;align-items:center;gap:7px"><span style="width:12px;height:12px;border-radius:999px;border:1.5px solid #D42A41"></span>Exception path</div>
+</div>
+</div>
+
+<!-- LANE 1 -->
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+<div style="font:700 10.5px/1 'Open Sans';letter-spacing:.6px;color:#999;text-transform:uppercase">Lane 1 — Request &amp; routing</div>
+<div style="flex:1;height:1px;background:#EFEFEF"></div>
+</div>
+
+<div style="display:flex;align-items:flex-start;gap:4px;padding:18px 0 8px">
+
+<div style="display:flex;flex-direction:column;align-items:center;gap:9px;width:136px">
+<div style="position:relative;width:78px;height:78px;border-radius:999px;border:1.5px solid #181059;background:#fff;display:grid;place-items:center">
+<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#181059" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v3H9z"/><path d="M15 4.5h2a1.5 1.5 0 0 1 1.5 1.5V19a1.5 1.5 0 0 1-1.5 1.5H7A1.5 1.5 0 0 1 5.5 19V6A1.5 1.5 0 0 1 7 4.5h2"/><path d="M12 11v5M9.5 13.5h5"/></svg>
+<span style="position:absolute;top:-5px;right:-5px;width:22px;height:22px;border-radius:999px;background:#181059;color:#fff;font:700 11px/22px 'Open Sans';text-align:center">1</span>
+</div>
+<div style="font:700 12.5px/1.3 'Open Sans';color:#181059;text-align:center">Raise requisition</div>
+<div style="font:400 10.5px/1.4 'Open Sans';color:#757575;text-align:center">Technician / Advisor<br>Status: Draft</div>
+</div>
+
+<div style="margin-top:32px;color:#C8C8C8"><svg width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M0 6h24M21 2.5 24.5 6 21 9.5"/></svg></div>
+
+<div style="display:flex;flex-direction:column;align-items:center;gap:9px;width:136px">
+<div style="position:relative;width:78px;height:78px;border-radius:999px;border:1.5px solid #181059;background:#fff;display:grid;place-items:center">
+<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#181059" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 3.5 11 13"/><path d="M20.5 3.5 14.5 20.5 11 13 3.5 9.5z"/></svg>
+<span style="position:absolute;top:-5px;right:-5px;width:22px;height:22px;border-radius:999px;background:#181059;color:#fff;font:700 11px/22px 'Open Sans';text-align:center">2</span>
+</div>
+<div style="font:700 12.5px/1.3 'Open Sans';color:#181059;text-align:center">Submit</div>
+<div style="font:400 10.5px/1.4 'Open Sans';color:#757575;text-align:center">Requester<br>Draft → Submitted</div>
+</div>
+
+<div style="margin-top:32px;color:#C8C8C8"><svg width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M0 6h24M21 2.5 24.5 6 21 9.5"/></svg></div>
+
+<div style="display:flex;flex-direction:column;align-items:center;gap:9px;width:136px">
+<div style="position:relative;width:78px;height:78px;border-radius:999px;border:1.5px dashed #7A81BE;background:#F7F7FB;display:grid;place-items:center">
+<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#181059" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8.5 7.5h7M8.5 12h2M13 12h2.5M8.5 16h2M13 16h2.5"/></svg>
+<span style="position:absolute;top:-5px;right:-5px;width:22px;height:22px;border-radius:999px;background:#7A81BE;color:#fff;font:700 11px/22px 'Open Sans';text-align:center">3</span>
+</div>
+<div style="font:700 12.5px/1.3 'Open Sans';color:#181059;text-align:center">Total the request</div>
+<div style="font:400 10.5px/1.4 'Open Sans';color:#757575;text-align:center">Flow sums line totals<br>writes Total Value</div>
+</div>
+
+<div style="margin-top:32px;color:#C8C8C8"><svg width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M0 6h24M21 2.5 24.5 6 21 9.5"/></svg></div>
+
+<div style="display:flex;flex-direction:column;align-items:center;gap:9px;width:136px">
+<div style="position:relative;width:78px;height:78px;border-radius:999px;border:1.5px dashed #7A81BE;background:#F7F7FB;display:grid;place-items:center">
+<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#181059" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.5" cy="6" r="2.5"/><circle cx="17.5" cy="6" r="2.5"/><circle cx="6.5" cy="18" r="2.5"/><path d="M6.5 8.5v7M9 6h6M17.5 8.5v3a2 2 0 0 1-2 2H9"/></svg>
+<span style="position:absolute;top:-5px;right:-5px;width:22px;height:22px;border-radius:999px;background:#7A81BE;color:#fff;font:700 11px/22px 'Open Sans';text-align:center">4</span>
+</div>
+<div style="font:700 12.5px/1.3 'Open Sans';color:#181059;text-align:center">Determine tier</div>
+<div style="font:400 10.5px/1.4 'Open Sans';color:#757575;text-align:center">&lt;1k · 1k–10k · &gt;10k<br>picks approver path</div>
+</div>
+
+<div style="margin-top:32px;color:#C8C8C8"><svg width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M0 6h24M21 2.5 24.5 6 21 9.5"/></svg></div>
+
+<div style="display:flex;flex-direction:column;align-items:center;gap:9px;width:136px">
+<div style="position:relative;width:78px;height:78px;border-radius:999px;border:1.5px dashed #7A81BE;background:#F7F7FB;display:grid;place-items:center">
+<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#181059" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6.5 8.5 6.5 8.5-6.5"/></svg>
+<span style="position:absolute;top:-5px;right:-5px;width:22px;height:22px;border-radius:999px;background:#7A81BE;color:#fff;font:700 11px/22px 'Open Sans';text-align:center">5</span>
+</div>
+<div style="font:700 12.5px/1.3 'Open Sans';color:#181059;text-align:center">Send approval card</div>
+<div style="font:400 10.5px/1.4 'Open Sans';color:#757575;text-align:center">Outlook + Teams<br>Status: In Approval</div>
+</div>
+
+<div style="margin-top:32px;color:#C8C8C8"><svg width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M0 6h24M21 2.5 24.5 6 21 9.5"/></svg></div>
+
+<div style="display:flex;flex-direction:column;align-items:center;gap:9px;width:136px">
+<div style="position:relative;width:78px;height:78px;border-radius:999px;border:1.5px solid #181059;background:#fff;display:grid;place-items:center">
+<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#181059" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 3.5 12 12 20.5 20.5 12z"/><path d="m9 12 2 2 4-4"/></svg>
+<span style="position:absolute;top:-5px;right:-5px;width:22px;height:22px;border-radius:999px;background:#181059;color:#fff;font:700 11px/22px 'Open Sans';text-align:center">6</span>
+</div>
+<div style="font:700 12.5px/1.3 'Open Sans';color:#181059;text-align:center">Approver decides</div>
+<div style="font:400 10.5px/1.4 'Open Sans';color:#757575;text-align:center">Approve / Reject<br>+ comment, in Outlook</div>
+</div>
+
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:14px;min-width:150px">
+<div style="font:700 10px/1 'Open Sans';letter-spacing:.5px;color:#D42A41;text-transform:uppercase">Rejected at any stage</div>
+<div style="display:flex;align-items:center;gap:10px">
+<div style="position:relative;width:62px;height:62px;border-radius:999px;border:1.5px solid #D42A41;background:#FFF4F5;display:grid;place-items:center">
+<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#D42A41" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="m9 9 6 6M15 9l-6 6"/></svg>
+<span style="position:absolute;top:-5px;right:-5px;width:22px;height:22px;border-radius:999px;background:#D42A41;color:#fff;font:700 11px/22px 'Open Sans';text-align:center">7</span>
+</div>
+<div style="font:400 10.5px/1.45 'Open Sans';color:#757575">Status → <strong style="color:#D42A41">Rejected</strong><br>reason emailed to requester<br>history row written · process ends</div>
+</div>
+</div>
+
+</div>
+
+<div style="height:1px;background:#EFEFEF;margin:26px 0 0"></div>
+
+<!-- LANE 2 -->
+<div style="display:flex;align-items:center;gap:10px;margin:24px 0 6px">
+<div style="font:700 10.5px/1 'Open Sans';letter-spacing:.6px;color:#999;text-transform:uppercase">Lane 2 — Escalation, audit &amp; fulfilment</div>
+<div style="flex:1;height:1px;background:#EFEFEF"></div>
+</div>
+
+<div style="display:flex;align-items:flex-start;gap:4px;padding:18px 0 4px">
+
+<div style="display:flex;flex-direction:column;align-items:center;gap:9px;width:136px">
+<div style="position:relative;width:78px;height:78px;border-radius:999px;border:1.5px dashed #7A81BE;background:#F7F7FB;display:grid;place-items:center">
+<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#181059" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5h9M4 12h9M4 17.5h9"/><path d="M16 6.5h4M16 12h4M16 17.5h4"/><path d="M13 6.5 16 12l-3 5.5"/></svg>
+<span style="position:absolute;top:-5px;right:-5px;width:22px;height:22px;border-radius:999px;background:#7A81BE;color:#fff;font:700 11px/22px 'Open Sans';text-align:center">8</span>
+</div>
+<div style="font:700 12.5px/1.3 'Open Sans';color:#181059;text-align:center">Sequential stage 2</div>
+<div style="font:400 10.5px/1.4 'Open Sans';color:#757575;text-align:center">&gt;10k only: Manager<br>then Finance Controller</div>
+</div>
+
+<div style="margin-top:32px;color:#C8C8C8"><svg width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M0 6h24M21 2.5 24.5 6 21 9.5"/></svg></div>
+
+<div style="display:flex;flex-direction:column;align-items:center;gap:9px;width:136px">
+<div style="position:relative;width:78px;height:78px;border-radius:999px;border:1.5px dashed #7A81BE;background:#F7F7FB;display:grid;place-items:center">
+<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#181059" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5V8"/><rect x="3" y="8" width="18" height="12" rx="1.5"/><path d="M9.5 12h5"/></svg>
+<span style="position:absolute;top:-5px;right:-5px;width:22px;height:22px;border-radius:999px;background:#7A81BE;color:#fff;font:700 11px/22px 'Open Sans';text-align:center">9</span>
+</div>
+<div style="font:700 12.5px/1.3 'Open Sans';color:#181059;text-align:center">Log to audit trail</div>
+<div style="font:400 10.5px/1.4 'Open Sans';color:#757575;text-align:center">Approval History row<br>who · level · when · why</div>
+</div>
+
+<div style="margin-top:32px;color:#C8C8C8"><svg width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M0 6h24M21 2.5 24.5 6 21 9.5"/></svg></div>
+
+<div style="display:flex;flex-direction:column;align-items:center;gap:9px;width:136px">
+<div style="position:relative;width:78px;height:78px;border-radius:999px;border:1.5px solid #34C759;background:#F3FCF5;display:grid;place-items:center">
+<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#1F9D45" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 12.2 2.4 2.4 4.6-5"/></svg>
+<span style="position:absolute;top:-5px;right:-5px;width:22px;height:22px;border-radius:999px;background:#1F9D45;color:#fff;font:700 11px/22px 'Open Sans';text-align:center">10</span>
+</div>
+<div style="font:700 12.5px/1.3 'Open Sans';color:#181059;text-align:center">Approved</div>
+<div style="font:400 10.5px/1.4 'Open Sans';color:#757575;text-align:center">Requester notified<br>released to procurement</div>
+</div>
+
+<div style="margin-top:32px;color:#C8C8C8"><svg width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M0 6h24M21 2.5 24.5 6 21 9.5"/></svg></div>
+
+<div style="display:flex;flex-direction:column;align-items:center;gap:9px;width:136px">
+<div style="position:relative;width:78px;height:78px;border-radius:999px;border:1.5px solid #181059;background:#fff;display:grid;place-items:center">
+<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#181059" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2.5l2.2 10.5h9.6L19 7H7"/><circle cx="9.5" cy="19" r="1.6"/><circle cx="16.5" cy="19" r="1.6"/></svg>
+<span style="position:absolute;top:-5px;right:-5px;width:24px;height:22px;border-radius:999px;background:#181059;color:#fff;font:700 11px/22px 'Open Sans';text-align:center">11</span>
+</div>
+<div style="font:700 12.5px/1.3 'Open Sans';color:#181059;text-align:center">Raise PO / Order</div>
+<div style="font:400 10.5px/1.4 'Open Sans';color:#757575;text-align:center">Procurement Officer<br>Status: Ordered</div>
+</div>
+
+<div style="margin-top:32px;color:#C8C8C8"><svg width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M0 6h24M21 2.5 24.5 6 21 9.5"/></svg></div>
+
+<div style="display:flex;flex-direction:column;align-items:center;gap:9px;width:136px">
+<div style="position:relative;width:78px;height:78px;border-radius:999px;border:1.5px solid #181059;background:#fff;display:grid;place-items:center">
+<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#181059" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 8.5v7L12 20.5 3.5 15.5v-7L12 3.5z"/><path d="m3.8 8.3 8.2 4.4 8.2-4.4M12 12.7v7.8"/><path d="m9 15.5 1.8 1.8 3.4-3.6" stroke="#1F9D45"/></svg>
+<span style="position:absolute;top:-5px;right:-5px;width:24px;height:22px;border-radius:999px;background:#181059;color:#fff;font:700 11px/22px 'Open Sans';text-align:center">12</span>
+</div>
+<div style="font:700 12.5px/1.3 'Open Sans';color:#181059;text-align:center">Goods received</div>
+<div style="font:400 10.5px/1.4 'Open Sans';color:#757575;text-align:center">Parts / sublet arrive<br>Status: Received · closed</div>
+</div>
+
+<div style="flex:1;min-width:170px;margin:6px 0 0 18px;border:1px solid #D9D9D9;border-radius:8px;padding:14px 16px;background:#F3F4F6">
+<div style="font:700 10px/1 'Open Sans';letter-spacing:.5px;color:#757575;text-transform:uppercase;margin-bottom:10px">Routing tiers (AED)</div>
+<div style="display:flex;flex-direction:column;gap:8px;font:400 11px/1.35 'Open Sans';color:#353A40">
+<div style="display:flex;justify-content:space-between;gap:12px"><span>Under 1,000</span><strong style="font-weight:600">Supervisor</strong></div>
+<div style="height:1px;background:#D9D9D9"></div>
+<div style="display:flex;justify-content:space-between;gap:12px"><span>1,000 – 10,000</span><strong style="font-weight:600">Workshop Manager</strong></div>
+<div style="height:1px;background:#D9D9D9"></div>
+<div style="display:flex;justify-content:space-between;gap:12px"><span>Above 10,000</span><strong style="font-weight:600">Manager → Finance</strong></div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+
+<!-- ============ 1b REQUISITION FORM ============ -->
+<div class="dv-opt" id="1b" data-screen-label="1b Requisition form">
+<div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>Requisition form — every field a technician fills, with BPF stage bar</div>
+<div class="dv-card" style="width:1400px;background:#fff">
+
+<div style="display:flex;align-items:center;gap:16px;height:48px;padding:0 18px;background:#181059">
+<div style="font:700 13px/1 'Open Sans';color:#fff">Workshop Requisitions</div>
+<div style="width:1px;height:20px;background:rgba(255,255,255,.25)"></div>
+<div style="font:400 12px/1 'Open Sans';color:rgba(255,255,255,.7)">GAC Service · Environment: Production</div>
+<div style="flex:1"></div>
+<div style="width:230px;height:28px;border-radius:4px;background:rgba(255,255,255,.14);display:flex;align-items:center;gap:8px;padding:0 10px">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 4 4"/></svg>
+<span style="font:400 11.5px/1 'Open Sans';color:rgba(255,255,255,.6)">Search</span>
+</div>
+<div style="width:28px;height:28px;border-radius:999px;background:#D42A41;display:grid;place-items:center;font:700 11px/1 'Open Sans';color:#fff">RK</div>
+</div>
+
+<div style="display:flex;min-height:1080px">
+
+<div style="width:214px;flex:none;background:#F6F6F6;border-right:1px solid #D9D9D9;padding:16px 0">
+<div style="font:700 10px/1 'Open Sans';letter-spacing:.6px;color:#999;text-transform:uppercase;padding:0 16px 10px">Areas</div>
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:#fff;border-left:3px solid #D42A41;font:600 12.5px/1 'Open Sans';color:#181059">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D42A41" stroke-width="1.6"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>Requisitions</div>
+<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;font:400 12.5px/1 'Open Sans';color:#353A40">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#757575" stroke-width="1.6"><path d="M4 20V8l8-4 8 4v12"/><path d="M9 20v-6h6v6"/></svg>Suppliers</div>
+<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;font:400 12.5px/1 'Open Sans';color:#353A40">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#757575" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>Approval History</div>
+<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;font:400 12.5px/1 'Open Sans';color:#353A40">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#757575" stroke-width="1.6"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>Dashboards</div>
+</div>
+<div style="font:700 10px/1 'Open Sans';letter-spacing:.6px;color:#999;text-transform:uppercase;padding:22px 16px 10px">Views</div>
+<div style="display:flex;flex-direction:column;gap:2px;font:400 12px/1 'Open Sans';color:#757575">
+<div style="padding:8px 16px">My Requisitions</div>
+<div style="padding:8px 16px">Pending Approval <span style="font-weight:700;color:#D42A41">14</span></div>
+<div style="padding:8px 16px">Approved This Month</div>
+<div style="padding:8px 16px">Rejected</div>
+<div style="padding:8px 16px">All Requisitions</div>
+</div>
+</div>
+
+<div style="flex:1;min-width:0;background:#fff">
+
+<div style="display:flex;align-items:center;gap:6px;height:44px;padding:0 20px;border-bottom:1px solid #D9D9D9">
+<div style="display:flex;align-items:center;gap:6px;height:28px;padding:0 14px;border-radius:6px;background:#D42A41;font:700 12px/1 'Nunito Sans';color:#fff">Submit for approval</div>
+<div style="display:flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:6px;border:1px solid #D9D9D9;font:600 12px/1 'Open Sans';color:#353A40">Save</div>
+<div style="display:flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:6px;border:1px solid #D9D9D9;font:600 12px/1 'Open Sans';color:#353A40">Save &amp; Close</div>
+<div style="display:flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:6px;border:1px solid #D9D9D9;font:600 12px/1 'Open Sans';color:#353A40">Attach quote</div>
+<div style="display:flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:6px;border:1px solid #D9D9D9;font:600 12px/1 'Open Sans';color:#353A40">Duplicate check</div>
+<div style="flex:1"></div>
+<div style="font:400 11.5px/1 'Open Sans';color:#999">Unsaved changes</div>
+</div>
+
+<div style="display:flex;align-items:flex-end;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid #EFEFEF">
+<div>
+<div style="font:400 11.5px/1 'Open Sans';color:#757575;margin-bottom:6px">Requisition · New</div>
+<div style="display:flex;align-items:center;gap:12px">
+<div style="font:700 22px/1.1 'Open Sans';color:#181059">REQ-000487</div>
+<div style="height:22px;padding:0 10px;border-radius:999px;background:#FFF4F5;border:1px solid #D42A41;font:700 10.5px/22px 'Open Sans';color:#D42A41">DRAFT</div>
+<div style="height:22px;padding:0 10px;border-radius:999px;background:#F3F4F6;font:600 10.5px/22px 'Open Sans';color:#757575">Tier 3 · Manager → Finance</div>
+</div>
+</div>
+<div style="display:flex;gap:34px;text-align:right">
+<div><div style="font:400 10.5px/1 'Open Sans';color:#757575;margin-bottom:6px">Total Value</div><div style="font:700 20px/1 'Open Sans';color:#181059">AED 14,380<span style="font:700 11px/1 'Open Sans';color:#757575">.00</span></div></div>
+<div><div style="font:400 10.5px/1 'Open Sans';color:#757575;margin-bottom:6px">Current Approver</div><div style="font:600 13px/1.4 'Open Sans';color:#353A40">— set on submit —</div></div>
+<div><div style="font:400 10.5px/1 'Open Sans';color:#757575;margin-bottom:6px">Job Card</div><div style="font:600 13px/1.4 'Open Sans';color:#353A40">JC-2026-11842</div></div>
+</div>
+</div>
+
+<div style="display:flex;align-items:center;gap:0;padding:16px 24px;background:#F6F6F6;border-bottom:1px solid #D9D9D9">
+<div style="display:flex;align-items:center;gap:8px;height:34px;padding:0 18px 0 14px;background:#181059;color:#fff;border-radius:4px 0 0 4px;font:700 11.5px/1 'Open Sans'"><span style="width:18px;height:18px;border-radius:999px;background:rgba(255,255,255,.25);display:grid;place-items:center;font:700 10px/1 'Open Sans'">1</span>Draft</div>
+<div style="display:flex;align-items:center;gap:8px;height:34px;padding:0 18px;background:#E6E7EF;color:#757575;font:600 11.5px/1 'Open Sans'"><span style="width:18px;height:18px;border-radius:999px;border:1.5px solid #B9BCD0;display:grid;place-items:center;font:700 10px/1 'Open Sans'">2</span>Submitted</div>
+<div style="display:flex;align-items:center;gap:8px;height:34px;padding:0 18px;background:#EDEEF4;color:#757575;font:600 11.5px/1 'Open Sans'"><span style="width:18px;height:18px;border-radius:999px;border:1.5px solid #B9BCD0;display:grid;place-items:center;font:700 10px/1 'Open Sans'">3</span>In Approval</div>
+<div style="display:flex;align-items:center;gap:8px;height:34px;padding:0 18px;background:#F1F2F6;color:#999;font:600 11.5px/1 'Open Sans'"><span style="width:18px;height:18px;border-radius:999px;border:1.5px solid #CFD2E0;display:grid;place-items:center;font:700 10px/1 'Open Sans'">4</span>Approved</div>
+<div style="display:flex;align-items:center;gap:8px;height:34px;padding:0 18px;background:#F5F6F9;color:#999;font:600 11.5px/1 'Open Sans'"><span style="width:18px;height:18px;border-radius:999px;border:1.5px solid #CFD2E0;display:grid;place-items:center;font:700 10px/1 'Open Sans'">5</span>Ordered</div>
+<div style="display:flex;align-items:center;gap:8px;height:34px;padding:0 18px;background:#F9F9FB;color:#B0B0B0;border-radius:0 4px 4px 0;font:600 11.5px/1 'Open Sans'"><span style="width:18px;height:18px;border-radius:999px;border:1.5px solid #DDD;display:grid;place-items:center;font:700 10px/1 'Open Sans'">6</span>Received</div>
+<div style="flex:1"></div>
+<div style="font:400 11px/1.4 'Open Sans';color:#757575">Business process flow · stage 1 of 6</div>
+</div>
+
+<div style="display:flex;gap:0;align-items:flex-start">
+
+<div style="flex:1;min-width:0;padding:24px">
+
+<div style="font:700 11px/1 'Open Sans';letter-spacing:.5px;color:#181059;text-transform:uppercase;padding-bottom:12px;border-bottom:1px solid #D9D9D9">Requester &amp; job context</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px 20px;padding:18px 0 6px">
+<div><div style="font:400 11px/1 'Open Sans';color:#757575;margin-bottom:6px">Requester <span style="color:#999">(auto)</span></div><div style="height:34px;border:1px solid #D9D9D9;border-radius:6px;background:#F3F4F6;display:flex;align-items:center;padding:0 10px;font:400 12.5px/1 'Open Sans';color:#353A40">Ramesh Kumar · Technician</div></div>
+<div><div style="font:400 11px/1 'Open Sans';color:#757575;margin-bottom:6px">Branch / Workshop <span style="color:#D42A41">*</span></div><div style="height:34px;border:1px solid #D9D9D9;border-radius:6px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;font:400 12.5px/1 'Open Sans';color:#353A40">Wattayah Service Centre <span style="color:#999">▾</span></div></div>
+<div><div style="font:400 11px/1 'Open Sans';color:#757575;margin-bottom:6px">Cost centre <span style="color:#D42A41">*</span></div><div style="height:34px;border:1px solid #D9D9D9;border-radius:6px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;font:400 12.5px/1 'Open Sans';color:#353A40">WS-MECH-01 <span style="color:#999">▾</span></div></div>
+<div><div style="font:400 11px/1 'Open Sans';color:#757575;margin-bottom:6px">Job card no. <span style="color:#D42A41">*</span></div><div style="height:34px;border:1px solid #D9D9D9;border-radius:6px;display:flex;align-items:center;padding:0 10px;font:400 12.5px/1 'Open Sans';color:#353A40">JC-2026-11842</div></div>
+<div><div style="font:400 11px/1 'Open Sans';color:#757575;margin-bottom:6px">Repair order type</div><div style="height:34px;border:1px solid #D9D9D9;border-radius:6px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;font:400 12.5px/1 'Open Sans';color:#353A40">Customer pay <span style="color:#999">▾</span></div></div>
+<div><div style="font:400 11px/1 'Open Sans';color:#757575;margin-bottom:6px">Warranty / campaign</div><div style="height:34px;border:1px solid #D9D9D9;border-radius:6px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;font:400 12.5px/1 'Open Sans';color:#999">Out of warranty <span>▾</span></div></div>
+<div><div style="font:400 11px/1 'Open Sans';color:#757575;margin-bottom:6px">Customer name</div><div style="height:34px;border:1px solid #D9D9D9;border-radius:6px;display:flex;align-items:center;padding:0 10px;font:400 12.5px/1 'Open Sans';color:#353A40">Al Hosni Trading LLC</div></div>
+<div><div style="font:400 11px/1 'Open Sans';color:#757575;margin-bottom:6px">Vehicle model / year</div><div style="height:34px;border:1px solid #D9D9D9;border-radius:6px;display:flex;align-items:center;padding:0 10px;font:400 12.5px/1 'Open Sans';color:#353A40">Montero Sport · 2022</div></div>
+<div><div style="font:400 11px/1 'Open Sans';color:#757575;margin-bottom:6px">Reg. no. / VIN</div><div style="height:34px;border:1px solid #D9D9D9;border-radius:6px;display:flex;align-items:center;padding:0 10px;font:400 12.5px/1 'Open Sans';color:#353A40">A 48213 · MMBJ…4021</div></div>
+<div><div style="font:400 11px/1 'Open Sans';color:#757575;margin-bottom:6px">Odometer (KM)</div><div style="height:34px;border:1px solid #D9D9D9;border-radius:6px;display:flex;align-items:center;padding:0 10px;font:400 12.5px/1 'Open Sans';color:#353A40">86,420</div></div>
+<div><div style="font:400 11px/1 'Open Sans';color:#757575;margin-bottom:6px">Vehicle off road?</div><div style="height:34px;display:flex;align-items:center;gap:8px"><span style="width:38px;height:20px;border-radius:999px;background:#D42A41;display:flex;align-items:center;justify-content:flex-end;padding:0 3px"><span style="width:14px;height:14px;border-radius:999px;background:#fff"></span></span><span style="font:600 12px/1 'Open Sans';color:#D42A41">Yes — VOR 3 days</span></div></div>
+<div><div style="font:400 11px/1 'Open Sans';color:#757575;margin-bottom:6px">Required by <span style="color:#D42A41">*</span></div><div style="height:34px;border:1px solid #D9D9D9;border-radius:6px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;font:400 12.5px/1 'Open Sans';color:#353A40">28 Aug 2026 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.6"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg></div></div>
+</div>
+
+<div style="font:700 11px/1 'Open Sans';letter-spacing:.5px;color:#181059;text-transform:uppercase;padding:22px 0 12px;border-bottom:1px solid #D9D9D9">Line items <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#757575">· sub-grid, Requisition Line Item table</span></div>
+
+<div style="border:1px solid #D9D9D9;border-top:none;border-radius:0 0 6px 6px;overflow:hidden;margin-top:0">
+<div style="display:grid;grid-template-columns:32px 2.4fr 1fr 1fr .6fr .9fr 1fr 28px;gap:10px;padding:10px 12px;background:#F3F4F6;font:700 10.5px/1.2 'Open Sans';color:#757575;text-transform:uppercase;letter-spacing:.3px">
+<div>#</div><div>Item description</div><div>Part / OE no.</div><div>Category</div><div style="text-align:right">Qty</div><div style="text-align:right">Unit price</div><div style="text-align:right">Line total</div><div></div>
+</div>
+<div style="display:grid;grid-template-columns:32px 2.4fr 1fr 1fr .6fr .9fr 1fr 28px;gap:10px;padding:12px;border-top:1px solid #D9D9D9;font:400 12px/1.3 'Open Sans';color:#353A40;align-items:center">
+<div style="color:#999">01</div><div style="font-weight:600">Transfer case assembly — reman</div><div style="color:#757575">3402A055</div><div><span style="padding:3px 8px;border-radius:6px;background:#E6E7EF;font:600 10.5px/1 'Open Sans';color:#181059">Part</span></div><div style="text-align:right">1</div><div style="text-align:right">9,850.00</div><div style="text-align:right;font-weight:700">9,850.00</div><div style="color:#C8C8C8">⋮</div>
+</div>
+<div style="display:grid;grid-template-columns:32px 2.4fr 1fr 1fr .6fr .9fr 1fr 28px;gap:10px;padding:12px;border-top:1px solid #D9D9D9;font:400 12px/1.3 'Open Sans';color:#353A40;align-items:center">
+<div style="color:#999">02</div><div style="font-weight:600">4WD actuator diagnostics — sublet</div><div style="color:#999">—</div><div><span style="padding:3px 8px;border-radius:6px;background:#FFE8E8;font:600 10.5px/1 'Open Sans';color:#B8233A">Sublet</span></div><div style="text-align:right">1</div><div style="text-align:right">2,400.00</div><div style="text-align:right;font-weight:700">2,400.00</div><div style="color:#C8C8C8">⋮</div>
+</div>
+<div style="display:grid;grid-template-columns:32px 2.4fr 1fr 1fr .6fr .9fr 1fr 28px;gap:10px;padding:12px;border-top:1px solid #D9D9D9;font:400 12px/1.3 'Open Sans';color:#353A40;align-items:center">
+<div style="color:#999">03</div><div style="font-weight:600">Torque wrench 3/4" 100–500Nm</div><div style="color:#757575">TL-7745</div><div><span style="padding:3px 8px;border-radius:6px;background:#E6E7EF;font:600 10.5px/1 'Open Sans';color:#181059">Tool</span></div><div style="text-align:right">1</div><div style="text-align:right">1,780.00</div><div style="text-align:right;font-weight:700">1,780.00</div><div style="color:#C8C8C8">⋮</div>
+</div>
+<div style="display:grid;grid-template-columns:32px 2.4fr 1fr 1fr .6fr .9fr 1fr 28px;gap:10px;padding:12px;border-top:1px solid #D9D9D9;font:400 12px/1.3 'Open Sans';color:#353A40;align-items:center">
+<div style="color:#999">04</div><div style="font-weight:600">ATF SP-III fluid, 4L</div><div style="color:#757575">MZ320233</div><div><span style="padding:3px 8px;border-radius:6px;background:#E6E7EF;font:600 10.5px/1 'Open Sans';color:#181059">Consumable</span></div><div style="text-align:right">3</div><div style="text-align:right">116.67</div><div style="text-align:right;font-weight:700">350.00</div><div style="color:#C8C8C8">⋮</div>
+</div>
+<div style="display:flex;align-items:center;gap:14px;padding:10px 12px;border-top:1px solid #D9D9D9;background:#FCFCFD">
+<div style="display:flex;align-items:center;gap:6px;font:600 12px/1 'Open Sans';color:#D42A41"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D42A41" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>New line item</div>
+<div style="display:flex;align-items:center;gap:6px;font:600 12px/1 'Open Sans';color:#757575">Add from parts catalogue</div>
+<div style="flex:1"></div>
+<div style="font:400 11.5px/1 'Open Sans';color:#757575">4 lines · Subtotal <strong style="font-weight:700;color:#181059">AED 14,380.00</strong></div>
+</div>
+</div>
+
+<div style="font:700 11px/1 'Open Sans';letter-spacing:.5px;color:#181059;text-transform:uppercase;padding:22px 0 12px;border-bottom:1px solid #D9D9D9">Supplier &amp; justification</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px 20px;padding:18px 0 6px">
+<div><div style="font:400 11px/1 'Open Sans';color:#757575;margin-bottom:6px">Supplier <span style="color:#D42A41">*</span></div><div style="height:34px;border:1px solid #D9D9D9;border-radius:6px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;font:400 12.5px/1 'Open Sans';color:#353A40">Gulf Drivetrain Spares LLC <span style="color:#999">▾</span></div></div>
+<div><div style="font:400 11px/1 'Open Sans';color:#757575;margin-bottom:6px">Supplier status</div><div style="height:34px;display:flex;align-items:center;gap:8px"><span style="padding:5px 10px;border-radius:999px;background:#FFF7E6;border:1px solid #F5B128;font:700 10.5px/1 'Open Sans';color:#8A6100">Off-contract vendor</span><span style="font:400 11px/1 'Open Sans';color:#757575">no framework agreement</span></div></div>
+<div><div style="font:400 11px/1 'Open Sans';color:#757575;margin-bottom:6px">Quotes attached</div><div style="height:34px;border:1px dashed #D9D9D9;border-radius:6px;display:flex;align-items:center;gap:8px;padding:0 10px;font:400 12px/1 'Open Sans';color:#353A40"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#757575" stroke-width="1.6"><path d="M14 3v5h5"/><path d="M19 8v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7z"/></svg>quote-gulf-drivetrain.pdf <span style="color:#999">· 1 of 3 required</span></div></div>
+<div><div style="font:400 11px/1 'Open Sans';color:#757575;margin-bottom:6px">Payment terms</div><div style="height:34px;border:1px solid #D9D9D9;border-radius:6px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;font:400 12.5px/1 'Open Sans';color:#353A40">30 days credit <span style="color:#999">▾</span></div></div>
+<div><div style="font:400 11px/1 'Open Sans';color:#757575;margin-bottom:6px">Expected lead time</div><div style="height:34px;border:1px solid #D9D9D9;border-radius:6px;display:flex;align-items:center;padding:0 10px;font:400 12.5px/1 'Open Sans';color:#353A40">6 working days</div></div>
+<div><div style="font:400 11px/1 'Open Sans';color:#757575;margin-bottom:6px">Priority</div><div style="height:34px;display:flex;align-items:center;gap:6px"><span style="padding:6px 12px;border-radius:6px;background:#D42A41;font:700 11px/1 'Open Sans';color:#fff">Urgent</span><span style="padding:6px 12px;border-radius:6px;border:1px solid #D9D9D9;font:400 11px/1 'Open Sans';color:#757575">Normal</span><span style="padding:6px 12px;border-radius:6px;border:1px solid #D9D9D9;font:400 11px/1 'Open Sans';color:#757575">Low</span></div></div>
+<div style="grid-column:1 / -1"><div style="display:flex;align-items:baseline;gap:8px;margin-bottom:6px"><span style="font:400 11px/1 'Open Sans';color:#757575">Justification <span style="color:#D42A41">*</span></span><span style="font:400 10.5px/1 'Open Sans';color:#D42A41">Required — total is AED 10,000 or above (business rule)</span></div><div style="min-height:74px;border:1px solid #D42A41;border-radius:6px;padding:10px;font:400 12.5px/1.5 'Open Sans';color:#353A40">Transfer case failure confirmed on road test; vehicle is off road and customer is a fleet account. Reman unit is the only stock available in Oman within lead time — OE new unit quoted at 18,600 with 4-week lead.</div></div>
+</div>
+
+</div>
+
+<div style="width:330px;flex:none;border-left:1px solid #D9D9D9;background:#FCFCFD;padding:20px 18px;display:flex;flex-direction:column;gap:16px">
+<div style="font:700 11px/1 'Open Sans';letter-spacing:.5px;color:#181059;text-transform:uppercase">Quick view</div>
+
+<div style="border:1px solid #D9D9D9;border-radius:8px;background:#181059;padding:16px;color:#fff">
+<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+<div><div style="font:400 10.5px/1 'Open Sans';color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.5px">Requisition risk score</div><div style="display:flex;align-items:baseline;gap:6px;margin-top:8px"><span style="font:700 34px/1 'Open Sans'">72</span><span style="font:600 12px/1 'Open Sans';color:rgba(255,255,255,.6)">/ 100</span></div></div>
+<span style="padding:5px 10px;border-radius:999px;background:#D42A41;font:700 10.5px/1 'Open Sans'">HIGH</span>
+</div>
+<div style="display:flex;gap:3px;margin:14px 0 12px">
+<span style="flex:1;height:6px;border-radius:999px;background:#D42A41"></span><span style="flex:1;height:6px;border-radius:999px;background:#D42A41"></span><span style="flex:1;height:6px;border-radius:999px;background:#D42A41"></span><span style="flex:1;height:6px;border-radius:999px;background:#F5B128"></span><span style="flex:1;height:6px;border-radius:999px;background:rgba(255,255,255,.25)"></span>
+</div>
+<div style="display:flex;flex-direction:column;gap:9px;font:400 11.5px/1.3 'Open Sans';color:rgba(255,255,255,.85)">
+<div style="display:flex;justify-content:space-between;gap:10px"><span>Value above 10k tier</span><strong style="font-weight:700">+28</strong></div>
+<div style="display:flex;justify-content:space-between;gap:10px"><span>Off-contract supplier</span><strong style="font-weight:700">+18</strong></div>
+<div style="display:flex;justify-content:space-between;gap:10px"><span>Single quote only (3 req.)</span><strong style="font-weight:700">+14</strong></div>
+<div style="display:flex;justify-content:space-between;gap:10px"><span>Possible duplicate REQ-000451</span><strong style="font-weight:700">+8</strong></div>
+<div style="display:flex;justify-content:space-between;gap:10px"><span>Requester history clean</span><strong style="font-weight:700;color:#7CE0A0">−4</strong></div>
+</div>
+<div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.2);font:400 10.5px/1.45 'Open Sans';color:rgba(255,255,255,.65)">Score is advisory. Above 70 the flow adds Finance Controller review regardless of tier.</div>
+</div>
+
+<div style="border:1px solid #D9D9D9;border-radius:8px;padding:14px;background:#fff">
+<div style="font:700 10.5px/1 'Open Sans';letter-spacing:.4px;color:#757575;text-transform:uppercase;margin-bottom:12px">Routing preview</div>
+<div style="display:flex;flex-direction:column;gap:0">
+<div style="display:flex;gap:10px"><div style="display:flex;flex-direction:column;align-items:center"><span style="width:22px;height:22px;border-radius:999px;background:#181059;color:#fff;font:700 10px/22px 'Open Sans';text-align:center">1</span><span style="width:1.5px;flex:1;background:#D9D9D9;min-height:22px"></span></div><div style="padding-bottom:14px"><div style="font:600 12px/1.3 'Open Sans';color:#353A40">Workshop Manager</div><div style="font:400 10.5px/1.4 'Open Sans';color:#757575">Salim Al Balushi · budget owner</div></div></div>
+<div style="display:flex;gap:10px"><div style="display:flex;flex-direction:column;align-items:center"><span style="width:22px;height:22px;border-radius:999px;background:#181059;color:#fff;font:700 10px/22px 'Open Sans';text-align:center">2</span><span style="width:1.5px;flex:1;background:#D9D9D9;min-height:22px"></span></div><div style="padding-bottom:14px"><div style="font:600 12px/1.3 'Open Sans';color:#353A40">Finance Controller</div><div style="font:400 10.5px/1.4 'Open Sans';color:#757575">Priya Nair · &gt;10k policy gate</div></div></div>
+<div style="display:flex;gap:10px"><div style="display:flex;flex-direction:column;align-items:center"><span style="width:22px;height:22px;border-radius:999px;border:1.5px solid #D9D9D9;color:#999;font:700 10px/20px 'Open Sans';text-align:center">3</span></div><div><div style="font:600 12px/1.3 'Open Sans';color:#757575">Procurement</div><div style="font:400 10.5px/1.4 'Open Sans';color:#999">PO raised after approval</div></div></div>
+</div>
+</div>
+
+<div style="border:1px solid #F5B128;border-radius:8px;padding:14px;background:#FFFBF2">
+<div style="display:flex;gap:9px">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A6100" stroke-width="1.6" stroke-linecap="round"><path d="M12 4 2.5 20.5h19z"/><path d="M12 10v4M12 17h.01"/></svg>
+<div><div style="font:700 12px/1.3 'Open Sans';color:#8A6100">Duplicate warning</div><div style="font:400 11px/1.45 'Open Sans';color:#7A5C1E;margin-top:4px">REQ-000451 raised 6 days ago for the same job card and part number. Review before submitting.</div><div style="font:700 11px/1 'Open Sans';color:#8A6100;margin-top:8px">Open REQ-000451 ›</div></div>
+</div>
+</div>
+
+<div style="border:1px solid #D9D9D9;border-radius:8px;padding:14px;background:#fff">
+<div style="font:700 10.5px/1 'Open Sans';letter-spacing:.4px;color:#757575;text-transform:uppercase;margin-bottom:12px">Approval history</div>
+<div style="font:400 11.5px/1.5 'Open Sans';color:#999">No decisions yet. Rows appear here once the requisition has been submitted — approver, level, action, comment and timestamp.</div>
+</div>
+
+<div style="border:1px solid #D9D9D9;border-radius:8px;padding:14px;background:#fff">
+<div style="font:700 10.5px/1 'Open Sans';letter-spacing:.4px;color:#757575;text-transform:uppercase;margin-bottom:10px">Budget impact</div>
+<div style="font:400 11px/1 'Open Sans';color:#757575">WS-MECH-01 · August</div>
+<div style="display:flex;align-items:baseline;gap:6px;margin:8px 0 10px"><span style="font:700 18px/1 'Open Sans';color:#181059">AED 186,420</span><span style="font:400 11px/1 'Open Sans';color:#757575">of 240,000</span></div>
+<div style="height:8px;border-radius:999px;background:#F3F4F6;overflow:hidden;display:flex"><span style="width:78%;background:#181059"></span><span style="width:6%;background:#D42A41"></span></div>
+<div style="display:flex;justify-content:space-between;margin-top:8px;font:400 10.5px/1 'Open Sans';color:#757575"><span>78% committed</span><span style="color:#D42A41">+6% this request</span></div>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ============ 1c DASHBOARD ============ -->
+<div class="dv-opt" id="1c" data-screen-label="1c Dashboard">
+<div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a>Dashboard — quick-view analytics tiles + risk-score watchlist</div>
+<div class="dv-card" style="width:1400px;background:#fff">
+
+<div style="display:flex;align-items:center;gap:16px;height:48px;padding:0 18px;background:#181059">
+<div style="font:700 13px/1 'Open Sans';color:#fff">Workshop Requisitions</div>
+<div style="width:1px;height:20px;background:rgba(255,255,255,.25)"></div>
+<div style="font:400 12px/1 'Open Sans';color:rgba(255,255,255,.7)">Dashboards · Requisition control tower</div>
+<div style="flex:1"></div>
+<div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 12px;border-radius:4px;background:rgba(255,255,255,.14);font:400 11.5px/1 'Open Sans';color:rgba(255,255,255,.85)">Last 30 days ▾</div>
+<div style="width:28px;height:28px;border-radius:999px;background:#D42A41;display:grid;place-items:center;font:700 11px/1 'Open Sans';color:#fff">SB</div>
+</div>
+
+<div style="padding:24px">
+
+<div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:18px">
+<div><div style="font:700 20px/1.2 'Open Sans';color:#181059">Good morning Salim,</div><div style="font:400 12.5px/1.4 'Open Sans';color:#757575;margin-top:5px">14 requisitions are waiting on you · AED 96,240 held in approval</div></div>
+<div style="display:flex;gap:8px">
+<div style="height:32px;padding:0 14px;border-radius:8px;background:#D42A41;font:700 12px/32px 'Nunito Sans';color:#fff">Review pending (14)</div>
+<div style="height:32px;padding:0 14px;border-radius:8px;border:1px solid #D9D9D9;font:600 12px/32px 'Open Sans';color:#353A40">Export</div>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px">
+<div style="border:1px solid #D9D9D9;border-radius:8px;padding:16px;background:#F3F4F6">
+<div style="display:flex;align-items:center;justify-content:space-between"><div style="font:400 10.5px/1.2 'Open Sans';color:#757575;text-transform:uppercase;letter-spacing:.4px">Pending approval</div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#757575" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></div>
+<div style="display:flex;align-items:baseline;gap:7px;margin-top:12px"><span style="font:700 28px/1 'Open Sans';color:#181059">14</span><span style="font:600 11px/1 'Open Sans';color:#D42A41">4 overdue</span></div>
+<div style="font:400 11px/1.4 'Open Sans';color:#757575;margin-top:8px">AED 96,240 held</div>
+</div>
+<div style="border:1px solid #D9D9D9;border-radius:8px;padding:16px;background:#F3F4F6">
+<div style="display:flex;align-items:center;justify-content:space-between"><div style="font:400 10.5px/1.2 'Open Sans';color:#757575;text-transform:uppercase;letter-spacing:.4px">Avg. approval time</div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#757575" stroke-width="1.6"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg></div>
+<div style="display:flex;align-items:baseline;gap:7px;margin-top:12px"><span style="font:700 28px/1 'Open Sans';color:#181059">6.4<span style="font:700 14px/1 'Open Sans'">h</span></span><span style="font:600 11px/1 'Open Sans';color:#1F9D45">▼ 41%</span></div>
+<div style="font:400 11px/1.4 'Open Sans';color:#757575;margin-top:8px">Was 10.8h pre-launch</div>
+</div>
+<div style="border:1px solid #D9D9D9;border-radius:8px;padding:16px;background:#F3F4F6">
+<div style="display:flex;align-items:center;justify-content:space-between"><div style="font:400 10.5px/1.2 'Open Sans';color:#757575;text-transform:uppercase;letter-spacing:.4px">First-pass approvals</div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#757575" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><path d="m8.5 12.2 2.4 2.4 4.6-5"/></svg></div>
+<div style="display:flex;align-items:baseline;gap:7px;margin-top:12px"><span style="font:700 28px/1 'Open Sans';color:#181059">82<span style="font:700 14px/1 'Open Sans'">%</span></span><span style="font:600 11px/1 'Open Sans';color:#1F9D45">▲ 6pts</span></div>
+<div style="font:400 11px/1.4 'Open Sans';color:#757575;margin-top:8px">Target 85%</div>
+</div>
+<div style="border:1px solid #D9D9D9;border-radius:8px;padding:16px;background:#F3F4F6">
+<div style="display:flex;align-items:center;justify-content:space-between"><div style="font:400 10.5px/1.2 'Open Sans';color:#757575;text-transform:uppercase;letter-spacing:.4px">Rejection rate</div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#757575" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><path d="m9 9 6 6M15 9l-6 6"/></svg></div>
+<div style="display:flex;align-items:baseline;gap:7px;margin-top:12px"><span style="font:700 28px/1 'Open Sans';color:#181059">11<span style="font:700 14px/1 'Open Sans'">%</span></span><span style="font:600 11px/1 'Open Sans';color:#D42A41">▲ 2pts</span></div>
+<div style="font:400 11px/1.4 'Open Sans';color:#757575;margin-top:8px">Top reason: no quote</div>
+</div>
+<div style="border:1px solid #D42A41;border-radius:8px;padding:16px;background:#FFF4F5">
+<div style="display:flex;align-items:center;justify-content:space-between"><div style="font:400 10.5px/1.2 'Open Sans';color:#B8233A;text-transform:uppercase;letter-spacing:.4px">High-risk open</div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D42A41" stroke-width="1.6" stroke-linecap="round"><path d="M12 4 2.5 20.5h19z"/><path d="M12 10v4M12 17h.01"/></svg></div>
+<div style="display:flex;align-items:baseline;gap:7px;margin-top:12px"><span style="font:700 28px/1 'Open Sans';color:#D42A41">5</span><span style="font:600 11px/1 'Open Sans';color:#B8233A">score ≥ 70</span></div>
+<div style="font:400 11px/1.4 'Open Sans';color:#B8233A;margin-top:8px">AED 61,900 exposure</div>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:1.35fr 1fr;gap:16px;margin-top:16px">
+
+<div style="border:1px solid #D9D9D9;border-radius:8px;padding:18px">
+<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px">
+<div style="font:700 13px/1 'Open Sans';color:#181059">Requisitions by status</div>
+<div style="font:400 11px/1 'Open Sans';color:#757575">248 records · last 30 days</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div><div style="display:flex;justify-content:space-between;font:400 11.5px/1.2 'Open Sans';color:#353A40;margin-bottom:5px"><span>Draft</span><span style="font-weight:600">31</span></div><div style="height:10px;border-radius:999px;background:#F3F4F6"><span style="display:block;width:13%;height:10px;border-radius:999px;background:#B9BCD0"></span></div></div>
+<div><div style="display:flex;justify-content:space-between;font:400 11.5px/1.2 'Open Sans';color:#353A40;margin-bottom:5px"><span>In Approval</span><span style="font-weight:600">14</span></div><div style="height:10px;border-radius:999px;background:#F3F4F6"><span style="display:block;width:6%;height:10px;border-radius:999px;background:#F5B128"></span></div></div>
+<div><div style="display:flex;justify-content:space-between;font:400 11.5px/1.2 'Open Sans';color:#353A40;margin-bottom:5px"><span>Approved</span><span style="font-weight:600">118</span></div><div style="height:10px;border-radius:999px;background:#F3F4F6"><span style="display:block;width:48%;height:10px;border-radius:999px;background:#181059"></span></div></div>
+<div><div style="display:flex;justify-content:space-between;font:400 11.5px/1.2 'Open Sans';color:#353A40;margin-bottom:5px"><span>Ordered</span><span style="font-weight:600">44</span></div><div style="height:10px;border-radius:999px;background:#F3F4F6"><span style="display:block;width:18%;height:10px;border-radius:999px;background:#7A81BE"></span></div></div>
+<div><div style="display:flex;justify-content:space-between;font:400 11.5px/1.2 'Open Sans';color:#353A40;margin-bottom:5px"><span>Received</span><span style="font-weight:600">14</span></div><div style="height:10px;border-radius:999px;background:#F3F4F6"><span style="display:block;width:6%;height:10px;border-radius:999px;background:#34C759"></span></div></div>
+<div><div style="display:flex;justify-content:space-between;font:400 11.5px/1.2 'Open Sans';color:#353A40;margin-bottom:5px"><span>Rejected</span><span style="font-weight:600">27</span></div><div style="height:10px;border-radius:999px;background:#F3F4F6"><span style="display:block;width:11%;height:10px;border-radius:999px;background:#D42A41"></span></div></div>
+</div>
+</div>
+
+<div style="border:1px solid #D9D9D9;border-radius:8px;padding:18px">
+<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px">
+<div style="font:700 13px/1 'Open Sans';color:#181059">Spend by value tier</div>
+<div style="font:400 11px/1 'Open Sans';color:#757575">AED</div>
+</div>
+<div style="display:flex;align-items:flex-end;gap:26px;height:170px;padding:0 6px;border-bottom:1px solid #D9D9D9">
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px"><span style="font:700 11.5px/1 'Open Sans';color:#181059">38,400</span><span style="width:100%;height:52px;border-radius:6px 6px 0 0;background:#B9BCD0"></span></div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px"><span style="font:700 11.5px/1 'Open Sans';color:#181059">142,800</span><span style="width:100%;height:118px;border-radius:6px 6px 0 0;background:#181059"></span></div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px"><span style="font:700 11.5px/1 'Open Sans';color:#181059">96,240</span><span style="width:100%;height:84px;border-radius:6px 6px 0 0;background:#D42A41"></span></div>
+</div>
+<div style="display:flex;gap:26px;padding:10px 6px 0;font:400 10.5px/1.35 'Open Sans';color:#757575;text-align:center">
+<div style="flex:1">Under 1,000<br><strong style="font-weight:600;color:#353A40">Supervisor</strong></div>
+<div style="flex:1">1,000–10,000<br><strong style="font-weight:600;color:#353A40">Manager</strong></div>
+<div style="flex:1">Above 10,000<br><strong style="font-weight:600;color:#353A40">Mgr → Finance</strong></div>
+</div>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:16px">
+<div style="border:1px solid #D9D9D9;border-radius:8px;padding:18px">
+<div style="font:700 13px/1 'Open Sans';color:#181059;margin-bottom:14px">Risk mix · open requisitions</div>
+<div style="display:flex;gap:4px;height:12px;border-radius:999px;overflow:hidden;margin-bottom:14px"><span style="flex:5;background:#D42A41"></span><span style="flex:9;background:#F5B128"></span><span style="flex:31;background:#34C759"></span></div>
+<div style="display:flex;flex-direction:column;gap:10px;font:400 11.5px/1.3 'Open Sans';color:#353A40">
+<div style="display:flex;align-items:center;gap:9px"><span style="width:9px;height:9px;border-radius:999px;background:#D42A41"></span>High (70–100)<span style="flex:1"></span><strong style="font-weight:700">5</strong></div>
+<div style="display:flex;align-items:center;gap:9px"><span style="width:9px;height:9px;border-radius:999px;background:#F5B128"></span>Medium (40–69)<span style="flex:1"></span><strong style="font-weight:700">9</strong></div>
+<div style="display:flex;align-items:center;gap:9px"><span style="width:9px;height:9px;border-radius:999px;background:#34C759"></span>Low (0–39)<span style="flex:1"></span><strong style="font-weight:700">31</strong></div>
+</div>
+<div style="margin-top:16px;padding-top:14px;border-top:1px solid #EFEFEF;font:400 11px/1.5 'Open Sans';color:#757575">Score inputs: value tier, supplier contract status, quote count, duplicate match, requester rejection history, VOR urgency.</div>
+</div>
+
+<div style="border:1px solid #D9D9D9;border-radius:8px;padding:18px">
+<div style="font:700 13px/1 'Open Sans';color:#181059;margin-bottom:14px">Top risk drivers</div>
+<div style="display:flex;flex-direction:column;gap:13px">
+<div><div style="display:flex;justify-content:space-between;font:400 11.5px/1.2 'Open Sans';color:#353A40;margin-bottom:5px"><span>Single-quote purchases</span><span style="font-weight:600">18</span></div><div style="height:8px;border-radius:999px;background:#F3F4F6"><span style="display:block;width:82%;height:8px;border-radius:999px;background:#D42A41"></span></div></div>
+<div><div style="display:flex;justify-content:space-between;font:400 11.5px/1.2 'Open Sans';color:#353A40;margin-bottom:5px"><span>Off-contract suppliers</span><span style="font-weight:600">12</span></div><div style="height:8px;border-radius:999px;background:#F3F4F6"><span style="display:block;width:60%;height:8px;border-radius:999px;background:#F5B128"></span></div></div>
+<div><div style="display:flex;justify-content:space-between;font:400 11.5px/1.2 'Open Sans';color:#353A40;margin-bottom:5px"><span>Duplicate job-card match</span><span style="font-weight:600">7</span></div><div style="height:8px;border-radius:999px;background:#F3F4F6"><span style="display:block;width:36%;height:8px;border-radius:999px;background:#F5B128"></span></div></div>
+<div><div style="display:flex;justify-content:space-between;font:400 11.5px/1.2 'Open Sans';color:#353A40;margin-bottom:5px"><span>Missing justification detail</span><span style="font-weight:600">5</span></div><div style="height:8px;border-radius:999px;background:#F3F4F6"><span style="display:block;width:24%;height:8px;border-radius:999px;background:#B9BCD0"></span></div></div>
+<div><div style="display:flex;justify-content:space-between;font:400 11.5px/1.2 'Open Sans';color:#353A40;margin-bottom:5px"><span>Price &gt;15% above last paid</span><span style="font-weight:600">4</span></div><div style="height:8px;border-radius:999px;background:#F3F4F6"><span style="display:block;width:19%;height:8px;border-radius:999px;background:#B9BCD0"></span></div></div>
+</div>
+</div>
+
+<div style="border:1px solid #D9D9D9;border-radius:8px;padding:18px">
+<div style="font:700 13px/1 'Open Sans';color:#181059;margin-bottom:14px">Ageing in approval</div>
+<div style="display:flex;flex-direction:column;gap:11px">
+<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:6px;background:#F3F4F6"><span style="font:700 16px/1 'Open Sans';color:#181059;width:26px">6</span><div style="flex:1;font:400 11.5px/1.3 'Open Sans';color:#353A40">Under 24 hours</div></div>
+<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:6px;background:#FFFBF2"><span style="font:700 16px/1 'Open Sans';color:#8A6100;width:26px">4</span><div style="flex:1;font:400 11.5px/1.3 'Open Sans';color:#7A5C1E">1–2 days · reminder sent</div></div>
+<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:6px;background:#FFF4F5"><span style="font:700 16px/1 'Open Sans';color:#D42A41;width:26px">4</span><div style="flex:1;font:400 11.5px/1.3 'Open Sans';color:#B8233A">Over 2 days · escalate</div></div>
+</div>
+<div style="margin-top:16px;padding-top:14px;border-top:1px solid #EFEFEF;font:400 11px/1.5 'Open Sans';color:#757575">SLA: supervisor 8h · manager 24h · finance 48h. Breaches escalate to the next level automatically.</div>
+</div>
+</div>
+
+<div style="border:1px solid #D9D9D9;border-radius:8px;margin-top:16px;overflow:hidden">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #D9D9D9">
+<div style="font:700 13px/1 'Open Sans';color:#181059">Risk watchlist · requisitions needing a second look</div>
+<div style="font:600 11.5px/1 'Open Sans';color:#D42A41">Open full view ›</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1.6fr 1.1fr 1fr .9fr 1.4fr .8fr;gap:12px;padding:10px 18px;background:#F3F4F6;font:700 10.5px/1.2 'Open Sans';color:#757575;text-transform:uppercase;letter-spacing:.3px">
+<div>Requisition</div><div>Requester · job card</div><div>Supplier</div><div style="text-align:right">Value (AED)</div><div>Tier</div><div>Top flag</div><div style="text-align:right">Risk</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1.6fr 1.1fr 1fr .9fr 1.4fr .8fr;gap:12px;padding:13px 18px;border-top:1px solid #EFEFEF;font:400 12px/1.3 'Open Sans';color:#353A40;align-items:center">
+<div style="font-weight:600;color:#181059">REQ-000487</div><div>R. Kumar · JC-11842</div><div>Gulf Drivetrain</div><div style="text-align:right;font-weight:700">14,380</div><div>Mgr → Finance</div><div style="color:#B8233A">Single quote, off-contract</div><div style="text-align:right"><span style="padding:4px 9px;border-radius:999px;background:#D42A41;font:700 11px/1 'Open Sans';color:#fff">72</span></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1.6fr 1.1fr 1fr .9fr 1.4fr .8fr;gap:12px;padding:13px 18px;border-top:1px solid #EFEFEF;font:400 12px/1.3 'Open Sans';color:#353A40;align-items:center">
+<div style="font-weight:600;color:#181059">REQ-000481</div><div>M. Said · JC-11790</div><div>Muscat Auto Elec</div><div style="text-align:right;font-weight:700">22,900</div><div>Mgr → Finance</div><div style="color:#B8233A">Price 19% above last paid</div><div style="text-align:right"><span style="padding:4px 9px;border-radius:999px;background:#D42A41;font:700 11px/1 'Open Sans';color:#fff">78</span></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1.6fr 1.1fr 1fr .9fr 1.4fr .8fr;gap:12px;padding:13px 18px;border-top:1px solid #EFEFEF;font:400 12px/1.3 'Open Sans';color:#353A40;align-items:center">
+<div style="font-weight:600;color:#181059">REQ-000476</div><div>A. Rahman · JC-11755</div><div>Falcon Sublet Co</div><div style="text-align:right;font-weight:700">11,250</div><div>Mgr → Finance</div><div style="color:#8A6100">Duplicate of REQ-000462</div><div style="text-align:right"><span style="padding:4px 9px;border-radius:999px;background:#F5B128;font:700 11px/1 'Open Sans';color:#4A3400">64</span></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1.6fr 1.1fr 1fr .9fr 1.4fr .8fr;gap:12px;padding:13px 18px;border-top:1px solid #EFEFEF;font:400 12px/1.3 'Open Sans';color:#353A40;align-items:center">
+<div style="font-weight:600;color:#181059">REQ-000470</div><div>S. Thomas · JC-11702</div><div>Oman Tool Supply</div><div style="text-align:right;font-weight:700">3,840</div><div>Manager</div><div style="color:#8A6100">Tool purchase, no asset tag</div><div style="text-align:right"><span style="padding:4px 9px;border-radius:999px;background:#F5B128;font:700 11px/1 'Open Sans';color:#4A3400">52</span></div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+
+<!-- ============ 1d LIST / APPROVER ============ -->
+<div class="dv-opt" id="1d" data-screen-label="1d Pending approval view">
+<div class="dv-olabel"><a class="dv-oid" href="#1d">1d</a>Pending Approval view + approver side panel (Outlook card equivalent in-app)</div>
+<div class="dv-card" style="width:1400px;background:#fff">
+
+<div style="display:flex;align-items:center;gap:16px;height:48px;padding:0 18px;background:#181059">
+<div style="font:700 13px/1 'Open Sans';color:#fff">Workshop Requisitions</div>
+<div style="width:1px;height:20px;background:rgba(255,255,255,.25)"></div>
+<div style="font:400 12px/1 'Open Sans';color:rgba(255,255,255,.7)">Requisitions · Pending Approval</div>
+<div style="flex:1"></div>
+<div style="width:28px;height:28px;border-radius:999px;background:#D42A41;display:grid;place-items:center;font:700 11px/1 'Open Sans';color:#fff">SB</div>
+</div>
+
+<div style="display:flex;align-items:center;gap:6px;height:44px;padding:0 20px;border-bottom:1px solid #D9D9D9">
+<div style="height:28px;padding:0 14px;border-radius:6px;background:#D42A41;font:700 12px/28px 'Nunito Sans';color:#fff">Approve selected</div>
+<div style="height:28px;padding:0 12px;border-radius:6px;border:1px solid #D42A41;font:600 12px/26px 'Open Sans';color:#D42A41">Reject</div>
+<div style="height:28px;padding:0 12px;border-radius:6px;border:1px solid #D9D9D9;font:600 12px/26px 'Open Sans';color:#353A40">Request info</div>
+<div style="height:28px;padding:0 12px;border-radius:6px;border:1px solid #D9D9D9;font:600 12px/26px 'Open Sans';color:#353A40">Reassign</div>
+<div style="flex:1"></div>
+<div style="height:28px;padding:0 12px;border-radius:6px;border:1px solid #D9D9D9;font:400 12px/26px 'Open Sans';color:#757575">Filter: risk ≥ 40 ▾</div>
+<div style="height:28px;padding:0 12px;border-radius:6px;border:1px solid #D9D9D9;font:400 12px/26px 'Open Sans';color:#757575">Sort: oldest ▾</div>
+</div>
+
+<div style="display:flex;min-height:660px">
+<div style="flex:1;min-width:0">
+<div style="display:grid;grid-template-columns:34px 1fr 1.5fr 1fr .9fr 1fr .8fr .9fr;gap:12px;padding:11px 18px;background:#F6F6F6;border-bottom:1px solid #D9D9D9;font:700 10.5px/1.2 'Open Sans';color:#757575;text-transform:uppercase;letter-spacing:.3px">
+<div></div><div>Requisition</div><div>Summary</div><div>Requester</div><div style="text-align:right">Value</div><div>Waiting on</div><div style="text-align:right">Age</div><div style="text-align:right">Risk</div>
+</div>
+
+<div style="display:grid;grid-template-columns:34px 1fr 1.5fr 1fr .9fr 1fr .8fr .9fr;gap:12px;padding:14px 18px;border-bottom:1px solid #EFEFEF;background:#F7F7FB;font:400 12px/1.35 'Open Sans';color:#353A40;align-items:center">
+<div><span style="display:block;width:15px;height:15px;border-radius:3px;background:#D42A41"></span></div>
+<div><div style="font-weight:700;color:#181059">REQ-000487</div><div style="font:400 10.5px/1.3 'Open Sans';color:#999">In Approval · L1</div></div>
+<div>Transfer case + sublet diagnostics<div style="font:400 10.5px/1.3 'Open Sans';color:#999">4 lines · JC-11842 · VOR</div></div>
+<div>R. Kumar<div style="font:400 10.5px/1.3 'Open Sans';color:#999">Technician · Wattayah</div></div>
+<div style="text-align:right;font-weight:700">14,380</div>
+<div>You<div style="font:400 10.5px/1.3 'Open Sans';color:#999">then Finance</div></div>
+<div style="text-align:right;color:#D42A41;font-weight:600">2d 4h</div>
+<div style="text-align:right"><span style="padding:4px 9px;border-radius:999px;background:#D42A41;font:700 11px/1 'Open Sans';color:#fff">72</span></div>
+</div>
+
+<div style="display:grid;grid-template-columns:34px 1fr 1.5fr 1fr .9fr 1fr .8fr .9fr;gap:12px;padding:14px 18px;border-bottom:1px solid #EFEFEF;font:400 12px/1.35 'Open Sans';color:#353A40;align-items:center">
+<div><span style="display:block;width:15px;height:15px;border-radius:3px;border:1.5px solid #C8C8C8"></span></div>
+<div><div style="font-weight:700;color:#181059">REQ-000481</div><div style="font:400 10.5px/1.3 'Open Sans';color:#999">In Approval · L1</div></div>
+<div>Alternator + wiring harness<div style="font:400 10.5px/1.3 'Open Sans';color:#999">2 lines · JC-11790</div></div>
+<div>M. Said<div style="font:400 10.5px/1.3 'Open Sans';color:#999">Service Advisor</div></div>
+<div style="text-align:right;font-weight:700">22,900</div>
+<div>You<div style="font:400 10.5px/1.3 'Open Sans';color:#999">then Finance</div></div>
+<div style="text-align:right;color:#D42A41;font-weight:600">2d 1h</div>
+<div style="text-align:right"><span style="padding:4px 9px;border-radius:999px;background:#D42A41;font:700 11px/1 'Open Sans';color:#fff">78</span></div>
+</div>
+
+<div style="display:grid;grid-template-columns:34px 1fr 1.5fr 1fr .9fr 1fr .8fr .9fr;gap:12px;padding:14px 18px;border-bottom:1px solid #EFEFEF;font:400 12px/1.35 'Open Sans';color:#353A40;align-items:center">
+<div><span style="display:block;width:15px;height:15px;border-radius:3px;border:1.5px solid #C8C8C8"></span></div>
+<div><div style="font-weight:700;color:#181059">REQ-000476</div><div style="font:400 10.5px/1.3 'Open Sans';color:#999">In Approval · L1</div></div>
+<div>Gearbox sublet overhaul<div style="font:400 10.5px/1.3 'Open Sans';color:#999">1 line · JC-11755</div></div>
+<div>A. Rahman<div style="font:400 10.5px/1.3 'Open Sans';color:#999">Technician</div></div>
+<div style="text-align:right;font-weight:700">11,250</div>
+<div>You<div style="font:400 10.5px/1.3 'Open Sans';color:#999">then Finance</div></div>
+<div style="text-align:right;color:#8A6100;font-weight:600">1d 6h</div>
+<div style="text-align:right"><span style="padding:4px 9px;border-radius:999px;background:#F5B128;font:700 11px/1 'Open Sans';color:#4A3400">64</span></div>
+</div>
+
+<div style="display:grid;grid-template-columns:34px 1fr 1.5fr 1fr .9fr 1fr .8fr .9fr;gap:12px;padding:14px 18px;border-bottom:1px solid #EFEFEF;font:400 12px/1.35 'Open Sans';color:#353A40;align-items:center">
+<div><span style="display:block;width:15px;height:15px;border-radius:3px;border:1.5px solid #C8C8C8"></span></div>
+<div><div style="font-weight:700;color:#181059">REQ-000470</div><div style="font:400 10.5px/1.3 'Open Sans';color:#999">In Approval · L1</div></div>
+<div>Torque wrench set<div style="font:400 10.5px/1.3 'Open Sans';color:#999">1 line · workshop tooling</div></div>
+<div>S. Thomas<div style="font:400 10.5px/1.3 'Open Sans';color:#999">Team Leader</div></div>
+<div style="text-align:right;font-weight:700">3,840</div>
+<div>You</div>
+<div style="text-align:right;color:#757575;font-weight:600">18h</div>
+<div style="text-align:right"><span style="padding:4px 9px;border-radius:999px;background:#F5B128;font:700 11px/1 'Open Sans';color:#4A3400">52</span></div>
+</div>
+
+<div style="display:grid;grid-template-columns:34px 1fr 1.5fr 1fr .9fr 1fr .8fr .9fr;gap:12px;padding:14px 18px;border-bottom:1px solid #EFEFEF;font:400 12px/1.35 'Open Sans';color:#353A40;align-items:center">
+<div><span style="display:block;width:15px;height:15px;border-radius:3px;border:1.5px solid #C8C8C8"></span></div>
+<div><div style="font-weight:700;color:#181059">REQ-000469</div><div style="font:400 10.5px/1.3 'Open Sans';color:#999">In Approval · L1</div></div>
+<div>Brake pads &amp; discs — fleet<div style="font:400 10.5px/1.3 'Open Sans';color:#999">3 lines · JC-11698</div></div>
+<div>N. Joseph<div style="font:400 10.5px/1.3 'Open Sans';color:#999">Technician</div></div>
+<div style="text-align:right;font-weight:700">2,160</div>
+<div>You</div>
+<div style="text-align:right;color:#757575;font-weight:600">9h</div>
+<div style="text-align:right"><span style="padding:4px 9px;border-radius:999px;background:#34C759;font:700 11px/1 'Open Sans';color:#0C4A22">24</span></div>
+</div>
+
+<div style="display:grid;grid-template-columns:34px 1fr 1.5fr 1fr .9fr 1fr .8fr .9fr;gap:12px;padding:14px 18px;border-bottom:1px solid #EFEFEF;font:400 12px/1.35 'Open Sans';color:#353A40;align-items:center">
+<div><span style="display:block;width:15px;height:15px;border-radius:3px;border:1.5px solid #C8C8C8"></span></div>
+<div><div style="font-weight:700;color:#181059">REQ-000465</div><div style="font:400 10.5px/1.3 'Open Sans';color:#999">In Approval · L1</div></div>
+<div>Cabin filters ×20 — stock<div style="font:400 10.5px/1.3 'Open Sans';color:#999">1 line · consumables</div></div>
+<div>R. Kumar<div style="font:400 10.5px/1.3 'Open Sans';color:#999">Technician</div></div>
+<div style="text-align:right;font-weight:700">640</div>
+<div>Supervisor</div>
+<div style="text-align:right;color:#757575;font-weight:600">4h</div>
+<div style="text-align:right"><span style="padding:4px 9px;border-radius:999px;background:#34C759;font:700 11px/1 'Open Sans';color:#0C4A22">12</span></div>
+</div>
+
+<div style="padding:14px 18px;font:400 11.5px/1 'Open Sans';color:#757575">1–6 of 14 · rows highlighted red breach the 24h manager SLA</div>
+</div>
+
+<div style="width:380px;flex:none;border-left:1px solid #D9D9D9;background:#FCFCFD;padding:20px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;justify-content:space-between">
+<div style="font:700 15px/1.2 'Open Sans';color:#181059">REQ-000487</div>
+<span style="padding:5px 10px;border-radius:999px;background:#D42A41;font:700 10.5px/1 'Open Sans';color:#fff">RISK 72 · HIGH</span>
+</div>
+<div style="font:400 11.5px/1.5 'Open Sans';color:#757575">Raised by R. Kumar (Technician) · 24 Aug 2026, 08:14 · Wattayah Service Centre · JC-2026-11842 · Montero Sport 2022, 86,420 km</div>
+
+<div style="border:1px solid #D9D9D9;border-radius:8px;background:#fff;overflow:hidden">
+<div style="display:flex;justify-content:space-between;padding:11px 13px;background:#F3F4F6;font:700 10.5px/1 'Open Sans';color:#757575;text-transform:uppercase;letter-spacing:.3px"><span>Line item</span><span>AED</span></div>
+<div style="display:flex;justify-content:space-between;gap:10px;padding:11px 13px;border-top:1px solid #EFEFEF;font:400 12px/1.35 'Open Sans';color:#353A40"><span>Transfer case assembly — reman</span><strong style="font-weight:700">9,850</strong></div>
+<div style="display:flex;justify-content:space-between;gap:10px;padding:11px 13px;border-top:1px solid #EFEFEF;font:400 12px/1.35 'Open Sans';color:#353A40"><span>4WD actuator diagnostics — sublet</span><strong style="font-weight:700">2,400</strong></div>
+<div style="display:flex;justify-content:space-between;gap:10px;padding:11px 13px;border-top:1px solid #EFEFEF;font:400 12px/1.35 'Open Sans';color:#353A40"><span>Torque wrench 3/4"</span><strong style="font-weight:700">1,780</strong></div>
+<div style="display:flex;justify-content:space-between;gap:10px;padding:11px 13px;border-top:1px solid #EFEFEF;font:400 12px/1.35 'Open Sans';color:#353A40"><span>ATF SP-III fluid ×3</span><strong style="font-weight:700">350</strong></div>
+<div style="display:flex;justify-content:space-between;gap:10px;padding:12px 13px;border-top:1px solid #D9D9D9;background:#FCFCFD;font:700 13px/1.2 'Open Sans';color:#181059"><span>Total</span><span>AED 14,380.00</span></div>
+</div>
+
+<div style="border:1px solid #D9D9D9;border-radius:8px;background:#fff;padding:13px">
+<div style="font:700 10.5px/1 'Open Sans';letter-spacing:.4px;color:#757575;text-transform:uppercase;margin-bottom:10px">Why this scored 72</div>
+<div style="display:flex;flex-direction:column;gap:8px;font:400 11.5px/1.35 'Open Sans';color:#353A40">
+<div style="display:flex;align-items:center;gap:8px"><span style="width:7px;height:7px;border-radius:999px;background:#D42A41"></span>Above 10k tier<span style="flex:1"></span><strong style="font-weight:700">+28</strong></div>
+<div style="display:flex;align-items:center;gap:8px"><span style="width:7px;height:7px;border-radius:999px;background:#D42A41"></span>Off-contract supplier<span style="flex:1"></span><strong style="font-weight:700">+18</strong></div>
+<div style="display:flex;align-items:center;gap:8px"><span style="width:7px;height:7px;border-radius:999px;background:#F5B128"></span>1 of 3 quotes attached<span style="flex:1"></span><strong style="font-weight:700">+14</strong></div>
+<div style="display:flex;align-items:center;gap:8px"><span style="width:7px;height:7px;border-radius:999px;background:#F5B128"></span>Duplicate REQ-000451<span style="flex:1"></span><strong style="font-weight:700">+8</strong></div>
+<div style="display:flex;align-items:center;gap:8px"><span style="width:7px;height:7px;border-radius:999px;background:#34C759"></span>Requester history clean<span style="flex:1"></span><strong style="font-weight:700;color:#1F9D45">−4</strong></div>
+</div>
+</div>
+
+<div style="border:1px solid #D9D9D9;border-radius:8px;background:#fff;padding:13px">
+<div style="font:700 10.5px/1 'Open Sans';letter-spacing:.4px;color:#757575;text-transform:uppercase;margin-bottom:8px">Justification</div>
+<div style="font:400 11.5px/1.55 'Open Sans';color:#353A40">Transfer case failure confirmed on road test; vehicle off road, fleet account. Reman unit is the only stock in Oman within lead time.</div>
+</div>
+
+<div>
+<div style="font:400 11px/1 'Open Sans';color:#757575;margin-bottom:6px">Your comment</div>
+<div style="min-height:60px;border:1px solid #D9D9D9;border-radius:6px;padding:10px;font:400 12px/1.5 'Open Sans';color:#999">Add a note — recorded in Approval History</div>
+</div>
+
+<div style="display:flex;gap:9px">
+<div style="flex:1;height:40px;border-radius:8px;background:#D42A41;box-shadow:4px 4px 40px rgba(0,0,0,.2);font:700 14px/40px 'Nunito Sans';color:#fff;text-align:center">Approve</div>
+<div style="flex:1;height:40px;border-radius:8px;border:1px solid #D42A41;font:700 14px/38px 'Nunito Sans';color:#D42A41;text-align:center">Reject</div>
+</div>
+<div style="font:400 10.5px/1.45 'Open Sans';color:#999;text-align:center">Same decision is available on the Outlook / Teams approval card</div>
+
+</div>
+</div>
+</div>
+</div>
+
+<!-- ============ 1e MOBILE ============ -->
+<div class="dv-opt" id="1e" data-screen-label="1e Technician mobile capture">
+<div class="dv-olabel"><a class="dv-oid" href="#1e">1e</a>Technician mobile capture — raise from the bay floor</div>
+<div class="dv-card" style="width:428px;background:#fff">
+<div style="height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;font:600 15px/1 'Inter',sans-serif;color:#181059;letter-spacing:-.3px"><span>9:41</span><span style="font:400 11px/1 'Open Sans';color:#757575">Bay 4 · offline-capable</span></div>
+
+<div style="background:#F6F6F6;padding:18px 24px 20px;border-bottom:1px solid #D9D9D9">
+<div style="font:400 12px/1 'Open Sans';color:#757575">Hello Ramesh,</div>
+<div style="font:700 22px/1.25 'Open Sans';color:#181059;margin-top:6px">New requisition</div>
+<div style="display:flex;gap:8px;margin-top:12px">
+<span style="padding:6px 11px;border-radius:999px;background:#fff;border:1px solid #D9D9D9;font:600 11px/1 'Open Sans';color:#353A40">JC-2026-11842</span>
+<span style="padding:6px 11px;border-radius:999px;background:#FFF4F5;border:1px solid #D42A41;font:600 11px/1 'Open Sans';color:#D42A41">VOR</span>
+</div>
+</div>
+
+<div style="padding:20px 24px;display:flex;flex-direction:column;gap:16px">
+
+<div style="display:flex;gap:12px">
+<div style="flex:1;border:1px solid #D9D9D9;border-radius:8px;padding:13px"><div style="font:400 10.5px/1 'Open Sans';color:#757575">Total so far</div><div style="font:700 20px/1 'Open Sans';color:#181059;margin-top:7px">AED 14,380</div></div>
+<div style="flex:1;border:1px solid #D42A41;border-radius:8px;padding:13px;background:#FFF4F5"><div style="font:400 10.5px/1 'Open Sans';color:#B8233A">Risk score</div><div style="display:flex;align-items:baseline;gap:5px;margin-top:7px"><span style="font:700 20px/1 'Open Sans';color:#D42A41">72</span><span style="font:600 10.5px/1 'Open Sans';color:#B8233A">HIGH</span></div></div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<div><div style="font:400 11px/1 'Open Sans';color:#757575;margin-bottom:6px">Scan part / VIN</div><div style="height:46px;border:1px solid #D9D9D9;border-radius:12px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;font:400 13px/1 'Open Sans';color:#999">3402A055 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D42A41" stroke-width="1.6"><path d="M4 8V5h3M20 8V5h-3M4 16v3h3M20 16v3h-3M7 8v8M11 8v8M14 8v8M17 8v8"/></svg></div></div>
+<div><div style="font:400 11px/1 'Open Sans';color:#757575;margin-bottom:6px">Category</div><div style="display:flex;gap:7px;flex-wrap:wrap"><span style="padding:8px 13px;border-radius:999px;background:#181059;font:600 11.5px/1 'Open Sans';color:#fff">Part</span><span style="padding:8px 13px;border-radius:999px;border:1px solid #D9D9D9;font:400 11.5px/1 'Open Sans';color:#757575">Tool</span><span style="padding:8px 13px;border-radius:999px;border:1px solid #D9D9D9;font:400 11.5px/1 'Open Sans';color:#757575">Sublet</span><span style="padding:8px 13px;border-radius:999px;border:1px solid #D9D9D9;font:400 11.5px/1 'Open Sans';color:#757575">Consumable</span></div></div>
+<div style="display:flex;gap:12px">
+<div style="flex:1"><div style="font:400 11px/1 'Open Sans';color:#757575;margin-bottom:6px">Qty</div><div style="height:46px;border:1px solid #D9D9D9;border-radius:12px;display:flex;align-items:center;padding:0 14px;font:600 13px/1 'Open Sans';color:#353A40">1</div></div>
+<div style="flex:1.4"><div style="font:400 11px/1 'Open Sans';color:#757575;margin-bottom:6px">Unit price</div><div style="height:46px;border:1px solid #D9D9D9;border-radius:12px;display:flex;align-items:center;padding:0 14px;font:600 13px/1 'Open Sans';color:#353A40">9,850.00</div></div>
+</div>
+<div><div style="font:400 11px/1 'Open Sans';color:#757575;margin-bottom:6px">Photo of failed part</div><div style="height:88px;border:1px dashed #D9D9D9;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;background:#FCFCFD"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.5"/><path d="M9 6l1.5-2h3L15 6"/></svg><span style="font:400 11px/1 'Open Sans';color:#999">Tap to capture · attaches to the line</span></div></div>
+<div><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font:400 11px/1 'Open Sans';color:#757575">Justification</span><span style="font:600 10.5px/1 'Open Sans';color:#D42A41">Required above 10k</span></div><div style="min-height:70px;border:1px solid #D42A41;border-radius:12px;padding:11px;font:400 12.5px/1.5 'Open Sans';color:#353A40">Transfer case failure confirmed on road test; vehicle off road, fleet account…</div></div>
+</div>
+
+<div style="border:1px solid #F5B128;border-radius:8px;background:#FFFBF2;padding:13px;display:flex;gap:9px">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A6100" stroke-width="1.6" stroke-linecap="round"><path d="M12 4 2.5 20.5h19z"/><path d="M12 10v4M12 17h.01"/></svg>
+<div style="font:400 11.5px/1.45 'Open Sans';color:#7A5C1E">Two more quotes needed before Finance will see this. <strong style="font-weight:700;color:#8A6100">Attach now</strong></div>
+</div>
+
+<div style="height:52px;border-radius:8px;background:#D42A41;box-shadow:4px 4px 40px rgba(0,0,0,.2);font:700 18px/52px 'Nunito Sans';color:#fff;text-align:center">Submit for approval</div>
+<div style="font:400 11px/1.45 'Open Sans';color:#757575;text-align:center">Routes to Salim Al Balushi, then Finance Controller</div>
+</div>
+
+<div style="display:flex;justify-content:space-around;padding:14px 0 18px;border-top:1px solid #EFEFEF;box-shadow:0 -10px 40px rgba(122,129,190,.16)">
+<div style="display:flex;flex-direction:column;align-items:center;gap:5px"><svg width="22" height="22" viewBox="0 0 24 24" fill="#D42A41"><path d="M4 20V9l8-5 8 5v11h-6v-6H10v6z"/></svg><span style="font:600 10px/1 'Open Sans';color:#D42A41">Dashboard</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:5px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.6"><path d="M18 8a6 6 0 1 0-12 0c0 7-2 9-2 9h16s-2-2-2-9"/><path d="M10.5 20a1.8 1.8 0 0 0 3 0"/></svg><span style="font:400 10px/1 'Open Sans';color:#999">Notifications</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:5px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2 2 2 0 0 1-4 0 1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 2 15a2 2 0 0 1 0-4 1.7 1.7 0 0 0 1.5-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 9 4a2 2 0 0 1 4 0 1.7 1.7 0 0 0 2.9 1.5l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 22 11a2 2 0 0 1 0 4z"/></svg><span style="font:400 10px/1 'Open Sans';color:#999">Settings</span></div>
+</div>
+</div>
+</div>
+
+</div>
+
+<p class="dv-next">Try next: "add the Procurement Officer screen after <a class="dv-oid" href="#1a">1a</a>" · "show the Outlook approval card and rejection email" · "swap AED for OMR across all screens"</p>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}"></script>
+</body>
+</html>
