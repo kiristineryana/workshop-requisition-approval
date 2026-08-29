@@ -7,12 +7,14 @@ export function KpiCard({
   value,
   accentBg,
   danger,
+  caption,
 }: {
   icon: ReactNode;
   label: string;
   value: string;
   accentBg: string;
   danger?: boolean;
+  caption?: string;
 }) {
   return (
     <div
@@ -67,6 +69,9 @@ export function KpiCard({
         >
           {label}
         </div>
+        {caption && (
+          <div style={{ fontSize: 11, color: danger ? BRAND_RED : TEXT_MUTED, marginTop: 4 }}>{caption}</div>
+        )}
       </div>
     </div>
   );

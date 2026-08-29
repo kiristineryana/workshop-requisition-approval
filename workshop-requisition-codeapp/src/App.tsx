@@ -82,7 +82,9 @@ function App() {
           boxSizing: 'border-box',
         }}
       >
-        {active === 'dashboard' && <DashboardPage />}
+        {active === 'dashboard' && (
+          <DashboardPage onNavigateToPending={() => setActive('pendingApproval')} onOpenRequisition={openRequisition} />
+        )}
         {active === 'requisitions' &&
           (requisitionDetailId ? (
             <RequisitionDetailPage
