@@ -339,6 +339,14 @@ export function RequisitionDetailPage({
     }
   }
 
+  async function refreshLineItems() {
+    const lineResult = await Wksp_requisitionlineitemsService.getAll({
+      filter: `_wksp_parentrequisitionid_value eq ${requisitionId}`,
+      maxPageSize: 200,
+    });
+    if (lineResult.success) setLineItems(lineResult.data ?? []);
+  }
+
   async function handleAddLine() {
     const result = await Wksp_requisitionlineitemsService.create({
       statecode: 0 as never,
@@ -349,7 +357,7 @@ export function RequisitionDetailPage({
       'wksp_ParentRequisitionId@odata.bind': `/wksp_requisitions(${requisitionId})`,
     });
     if (result.success) {
-      load();
+      await refreshLineItems();
     } else {
       setBanner({ kind: 'error', text: result.error?.message ?? 'Could not add line item.' });
     }
@@ -358,7 +366,7 @@ export function RequisitionDetailPage({
   async function handleUpdateLine(id: string, changes: Partial<Wksp_requisitionlineitems>) {
     const result = await Wksp_requisitionlineitemsService.update(id, changes);
     if (result.success) {
-      load();
+      await refreshLineItems();
     } else {
       setBanner({ kind: 'error', text: result.error?.message ?? 'Could not update line item.' });
     }
@@ -366,7 +374,7 @@ export function RequisitionDetailPage({
 
   async function handleDeleteLine(id: string) {
     await Wksp_requisitionlineitemsService.delete(id);
-    load();
+    await refreshLineItems();
   }
 
   const budget = costCentre?.wksp_monthlybudget ?? 0;
@@ -516,7 +524,12 @@ export function RequisitionDetailPage({
             </Field>
             <Field label="Branch / Workshop" required>
               {isDraft ? (
-                <input style={inputStyle} value={form.branchworkshop} onChange={(e) => setField('branchworkshop', e.target.value)} />
+                <input
+                  style={inputStyle}
+                  placeholder="e.g. Al Quoz Main Workshop"
+                  value={form.branchworkshop}
+                  onChange={(e) => setField('branchworkshop', e.target.value)}
+                />
               ) : (
                 <div style={readOnlyStyle}>{req.wksp_branchworkshop ?? '—'}</div>
               )}
@@ -537,7 +550,12 @@ export function RequisitionDetailPage({
             </Field>
             <Field label="Job card no." required>
               {isDraft ? (
-                <input style={inputStyle} value={form.jobcardnumber} onChange={(e) => setField('jobcardnumber', e.target.value)} />
+                <input
+                  style={inputStyle}
+                  placeholder="e.g. JC-2026-04213"
+                  value={form.jobcardnumber}
+                  onChange={(e) => setField('jobcardnumber', e.target.value)}
+                />
               ) : (
                 <div style={readOnlyStyle}>{req.wksp_jobcardnumber ?? '—'}</div>
               )}
@@ -562,21 +580,36 @@ export function RequisitionDetailPage({
             </Field>
             <Field label="Customer name">
               {isDraft ? (
-                <input style={inputStyle} value={form.customername} onChange={(e) => setField('customername', e.target.value)} />
+                <input
+                  style={inputStyle}
+                  placeholder="e.g. Ahmed Al Mansoori"
+                  value={form.customername}
+                  onChange={(e) => setField('customername', e.target.value)}
+                />
               ) : (
                 <div style={readOnlyStyle}>{req.wksp_customername ?? '—'}</div>
               )}
             </Field>
             <Field label="Vehicle model / year">
               {isDraft ? (
-                <input style={inputStyle} value={form.vehiclemodelyear} onChange={(e) => setField('vehiclemodelyear', e.target.value)} />
+                <input
+                  style={inputStyle}
+                  placeholder="e.g. Toyota Land Cruiser 2023"
+                  value={form.vehiclemodelyear}
+                  onChange={(e) => setField('vehiclemodelyear', e.target.value)}
+                />
               ) : (
                 <div style={readOnlyStyle}>{req.wksp_vehiclemodelyear ?? '—'}</div>
               )}
             </Field>
             <Field label="Reg. no. / VIN">
               {isDraft ? (
-                <input style={inputStyle} value={form.regnovin} onChange={(e) => setField('regnovin', e.target.value)} />
+                <input
+                  style={inputStyle}
+                  placeholder="e.g. DXB-A-12345"
+                  value={form.regnovin}
+                  onChange={(e) => setField('regnovin', e.target.value)}
+                />
               ) : (
                 <div style={readOnlyStyle}>{req.wksp_regnovin ?? '—'}</div>
               )}
@@ -586,6 +619,7 @@ export function RequisitionDetailPage({
                 <input
                   type="number"
                   style={inputStyle}
+                  placeholder="e.g. 45000"
                   value={form.odometerkm}
                   onChange={(e) => setField('odometerkm', e.target.value)}
                 />
@@ -708,6 +742,7 @@ export function RequisitionDetailPage({
                 <input
                   type="number"
                   style={inputStyle}
+                  placeholder="e.g. 2"
                   value={form.quotesattached}
                   onChange={(e) => setField('quotesattached', e.target.value)}
                 />
@@ -771,6 +806,7 @@ export function RequisitionDetailPage({
               </div>
               {isDraft ? (
                 <textarea
+                  placeholder="Explain why this purchase is necessary, e.g. Replacement parts required for warranty repair per approved job card."
                   value={form.justification}
                   onChange={(e) => setField('justification', e.target.value)}
                   style={{
